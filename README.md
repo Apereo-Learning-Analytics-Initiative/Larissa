@@ -1,5 +1,4 @@
 # Larissa LRS
----
 
 ## Introduction
 
@@ -31,11 +30,10 @@ phase. Therefore, use `mvn package` if you do not want this to happen.
 * Copy _target/larissa-&lt;version&gt;.war_ to _&lt;Tomcat&gt;/webapps/larissa.war_.
 
 * Add users with role 'user', e.g.
-
-
-    <role rolename="user"/>
-    <username="larissa" password="lrstester" roles="user"/>
-
+```
+<role rolename="user"/>
+<username="larissa" password="lrstester" roles="user"/>
+```
 to _&lt;Tomcat&gt;/conf/Tomcat-users.xml_.
 
 
