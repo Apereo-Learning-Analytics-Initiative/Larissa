@@ -1,0 +1,86 @@
+{
+  "id" : "6690e6c9-3ef0-4ed3-8b37-7f3964730bee",
+  "actor" : {
+    "objectType" : "Group",
+    "member" : [ {
+      "objectType" : "Agent",
+      "account" : {
+        "homePage" : "http://www.example.com",
+        "name" : "13936749"
+      }
+    }, {
+      "objectType" : "Agent",
+      "openid" : "http://toby.openid.example.org/"
+    }, {
+      "objectType" : "Agent",
+      "mbox_sha1sum" : "esydnag7fhxkquopagrr4aiputa="
+    } ],
+    "mbox" : "mailto:teampb@example.com"
+  },
+  "verb" : {
+    "id" : "http://adlnet.gov/expapi/verbs/attended",
+    "display" : {
+      "en-GB" : "attended",
+      "en-US" : "attended"
+    }
+  },
+  "object" : {
+    "objectType" : "Activity",
+    "id" : "http://www.example.com/meetings/occurances/34534"
+  },
+  "result" : {
+    "success" : true,
+    "completion" : true,
+    "response" : "We agreed on some example actions.",
+    "duration" : "PT1H0M0S",
+    "extensions" : {
+      "http://example.com/profiles/meetings/resultextensions/minuteslocation" : "X:\\meetings\\minutes\\examplemeeting.one"
+    }
+  },
+  "context" : {
+    "registration" : "ec531277-b57b-4c15-8d91-d292c5b2b8f7",
+    "instructor" : {
+      "objectType" : "Agent",
+      "account" : {
+        "homePage" : "http://www.example.com",
+        "name" : "13936749"
+      }
+    },
+    "team" : {
+      "objectType" : "Group",
+      "mbox" : "mailto:teampb@example.com"
+    },
+    "contextActivities" : {
+      "parent" : [ {
+        "objectType" : "Activity",
+        "id" : "http://www.example.com/meetings/series/267"
+      } ],
+      "category" : [ {
+        "objectType" : "Activity",
+        "id" : "http://www.example.com/meetings/categories/teammeeting"
+      } ],
+      "other" : [ {
+        "objectType" : "Activity",
+        "id" : "http://www.example.com/meetings/occurances/34257"
+      }, {
+        "objectType" : "Activity",
+        "id" : "http://www.example.com/meetings/occurances/3425567"
+      } ]
+    },
+    "platform" : "Example virtual meeting software",
+    "language" : "tlh",
+    "statement" : {
+      "objectType" : "StatementRef",
+      "id" : "6690e6c9-3ef0-4ed3-8b37-7f3964730bee"
+    }
+  },
+  "timestamp" : "2013-05-18T05:32:34.804Z",
+  "authority" : {
+    "objectType" : "Agent",
+    "account" : {
+      "homePage" : "http://cloud.scorm.com/",
+      "name" : "anonymous"
+    }
+  },
+  "version" : "1.0.0"
+}

@@ -1,0 +1,21 @@
+{
+  "id" : "12345678-1234-5678-1234-567812345678",
+  "actor" : {
+    "objectType" : "Agent",
+    "account" : {
+      "homePage" : "http://www.example.com",
+      "name" : "1625378"
+    }
+  },
+  "verb" : {
+    "id" : "http://www.adlnet.gov/XAPIprofile/ran(travelled_a_distance)",
+    "display" : {
+      "en-US" : "ran",
+      "es" : "corrió"
+    }
+  },
+  "object" : {
+    "objectType" : "Activity",
+    "id" : "http://example.adlnet.gov/xapi/example/activity"
+  }
+}

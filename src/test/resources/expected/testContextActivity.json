@@ -1,0 +1,47 @@
+{
+  "id" : "aaa62cae-bff7-11e3-afe6-000c29f0e33c",
+  "actor" : {
+    "objectType" : "Agent",
+    "name" : "Peter Tester",
+    "mbox" : "mailto:p.t.tester@dev.null"
+  },
+  "verb" : {
+    "id" : "http://adlnet.gov/expapi/verbs/asked",
+    "display" : {
+      "en-US" : "asked"
+    }
+  },
+  "object" : {
+    "objectType" : "Activity",
+    "id" : "act:adlnet.gov/course",
+    "definition" : {
+      "name" : {
+        "en-US" : "course"
+      },
+      "description" : {
+        "en-US" : "course"
+      },
+      "type" : "type:media"
+    }
+  },
+  "context" : {
+    "registration" : "ae2128e2-2109-45f3-af23-b27f18a64c1c",
+    "contextActivities" : {
+      "parent" : [ {
+        "objectType" : "Activity",
+        "id" : "http://example.adlnet.gov/xapi/example/test1"
+      } ],
+      "grouping" : [ {
+        "objectType" : "Activity",
+        "id" : "http://example.adlnet.gov/xapi/example/Algebra1"
+      } ]
+    }
+  },
+  "timestamp" : "2014-04-09T15:00:19.209Z",
+  "authority" : {
+    "objectType" : "Agent",
+    "name" : "Alan",
+    "mbox" : "mailto:a.m.berg@uva.nl"
+  },
+  "version" : "1.0.0"
+}

@@ -1,0 +1,72 @@
+{
+  "id" : "89c4683c-51b4-4e48-bbce-a91cd0ff7031",
+  "actor" : {
+    "objectType" : "Agent",
+    "name" : "Test User",
+    "mbox" : "mailto:test@beta.projecttincan.com"
+  },
+  "verb" : {
+    "id" : "http://adlnet.gov/expapi/verbs/answered",
+    "display" : {
+      "und" : "http://adlnet.gov/expapi/verbs/answered"
+    }
+  },
+  "object" : {
+    "objectType" : "Activity",
+    "id" : "http://tincanapi.com/GolfExample_TCAPI/GolfAssessment/interactions.playing_1",
+    "definition" : {
+      "description" : {
+        "en-US" : "The rules of golf are maintained by:"
+      },
+      "type" : "http://adlnet.gov/expapi/activities/cmi.interaction",
+      "interactionType" : "choice",
+      "correctResponsesPattern" : [ "USGA and Royal and Ancient" ],
+      "choices" : [ {
+        "id" : "The UN",
+        "description" : {
+          "en-US" : "The UN"
+        }
+      }, {
+        "id" : "USGA and Royal and Ancient",
+        "description" : {
+          "en-US" : "USGA and Royal and Ancient"
+        }
+      }, {
+        "id" : "The PGA",
+        "description" : {
+          "en-US" : "The PGA"
+        }
+      }, {
+        "id" : "Each course has it's own rules",
+        "description" : {
+          "en-US" : "Each course has it's own rules"
+        }
+      } ]
+    }
+  },
+  "result" : {
+    "success" : true,
+    "response" : "USGA and Royal and Ancient"
+  },
+  "context" : {
+    "contextActivities" : {
+      "parent" : [ {
+        "objectType" : "Activity",
+        "id" : "http://tincanapi.com/GolfExample_TCAPI/GolfAssessment.html"
+      } ],
+      "grouping" : [ {
+        "objectType" : "Activity",
+        "id" : "http://tincanapi.com/GolfExample_TCAPI"
+      } ]
+    }
+  },
+  "timestamp" : "2014-05-07T12:28:31.407Z",
+  "authority" : {
+    "objectType" : "Agent",
+    "account" : {
+      "homePage" : "http://cloud.scorm.com/",
+      "name" : "anonymous"
+    }
+  },
+  "version" : "1.0.0"
+}

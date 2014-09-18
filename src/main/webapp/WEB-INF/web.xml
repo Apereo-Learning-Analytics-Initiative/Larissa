@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<filter>
+		<filter-name>Jersey REST Service</filter-name>
+		<filter-class>org.glassfish.jersey.servlet.ServletContainer</filter-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>nl.uva.larissa.Application</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.mvc.templateBasePath.jsp</param-name>
+			<param-value>/WEB-INF/jsp/</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>Jersey REST Service</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<context-param>
+		<description>the location of the configuration file, relative to the root of the webapp directory</description>
+		<param-name>lrs.config</param-name>
+		<param-value>WEB-INF/lrs.conf</param-value>
+	</context-param>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>xAPI</web-resource-name>
+			<url-pattern>/xAPI/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>user</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+	<security-role>
+		<role-name>user</role-name>
+	</security-role>
+</web-app>
