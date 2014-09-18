@@ -63,3 +63,7 @@ This probably makes it a bad idea to connect to a non-localhost instance!
 
 ### Document APIs (State, Activity Profile, Agent Profile)
 * not there yet
+
+### About Resource
+* not there yet
+
