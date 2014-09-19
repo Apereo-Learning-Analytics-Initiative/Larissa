@@ -32,7 +32,7 @@ phase. Therefore, use `mvn package` if you do not want this to happen.
 * Add users with role 'user', e.g.
 ```
 <role rolename="user"/>
-<username="larissa" password="lrstester" roles="user"/>
+<user username="larissa" password="lrstester" roles="user"/>
 ```
 to _&lt;Tomcat&gt;/conf/Tomcat-users.xml_.
 
