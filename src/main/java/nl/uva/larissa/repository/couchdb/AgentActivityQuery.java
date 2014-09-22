@@ -20,8 +20,12 @@ public class AgentActivityQuery extends MapQuery {
 
 	@Override
 	protected void copyStartKeyValuesToFilter(StatementFilter filter,
-			StatementDocument nextDoc) {
-		filter.setSince(nextDoc.getStatement().getStored());
+			StatementDocument nextDoc, boolean isAscending) {
+		if (isAscending) { 
+			filter.setSince(nextDoc.getStatement().getStored());
+		} else {
+			filter.setUntil(nextDoc.getStatement().getStored());
+		}
 		filter.setStartId(nextDoc.getId());
 	}
 

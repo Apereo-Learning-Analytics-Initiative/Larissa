@@ -39,7 +39,9 @@ public abstract class MapQuery implements StatementResultQuery {
 			StatementFilter filter, QueryStrategy strategy) {
 
 		int limit = resolveLimit(filter.getLimit());
-		ViewQuery viewQuery = getViewQuery(filter, limit);
+		boolean isAscending = resolveAscending(filter.getAscending());
+
+		ViewQuery viewQuery = getViewQuery(filter, limit, isAscending);
 		viewQuery.staleOk(strategy == QueryStrategy.STALE);
 		List<StatementDocument> docs = connector.queryView(viewQuery,
 				StatementDocument.class);
@@ -54,11 +56,15 @@ public abstract class MapQuery implements StatementResultQuery {
 
 		if (nextDoc != null) {
 			StatementFilter moreFilter = new StatementFilter(filter);
-			copyStartKeyValuesToFilter(moreFilter, nextDoc);
+			copyStartKeyValuesToFilter(moreFilter, nextDoc, isAscending);
 			moreFilter.setStartId(nextDoc.getId());
 			result.setMore(StatementFilterUtil.toMoreUrl(moreFilter));
 		}
 		return result;
+	}
+
+	static boolean resolveAscending(Boolean ascending) {
+		return ascending == null ? false : ascending;
 	}
 
 	/**
@@ -66,9 +72,10 @@ public abstract class MapQuery implements StatementResultQuery {
 	 * @param nextDoc
 	 *            sets the values in filter required to form a query from
 	 *            nextDoc onwards
+	 * @param isAscending 
 	 */
 	protected abstract void copyStartKeyValuesToFilter(StatementFilter filter,
-			StatementDocument nextDoc);
+			StatementDocument nextDoc, boolean isAscending);
 
 	private List<Statement> docsToStatement(List<StatementDocument> docs) {
 		List<Statement> result = new ArrayList<>(docs.size());
@@ -78,16 +85,20 @@ public abstract class MapQuery implements StatementResultQuery {
 		return result;
 	}
 
-	private ViewQuery getViewQuery(StatementFilter filter, int limit) {
+	private ViewQuery getViewQuery(StatementFilter filter, int limit,
+			boolean ascending) {
 		ViewQuery viewQuery = new ViewQuery(mapper).designDocId(
 				"_design/statements").viewName(viewName);
-		Object startKey = getStartKey(filter);
+		Object startKey = ascending ? getStartKey(filter) : getEndKey(filter);
 		if (startKey != null) {
 			viewQuery.startKey(startKey);
 		}
-		Object endKey = getEndKey(filter);
+		Object endKey = ascending ? getEndKey(filter) : getStartKey(filter);
 		if (endKey != null) {
 			viewQuery.endKey(endKey);
+		}
+		if (!ascending) {
+			viewQuery.descending(true);
 		}
 		// fetch one too many for paging-check
 		viewQuery.limit(limit + 1);

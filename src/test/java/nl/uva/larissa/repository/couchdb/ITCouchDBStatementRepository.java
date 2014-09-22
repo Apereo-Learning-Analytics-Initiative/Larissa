@@ -359,6 +359,7 @@ public class ITCouchDBStatementRepository {
 		String uuid1 = repository.storeStatement(statement1);
 
 		StatementFilter filter = new StatementFilter();
+		filter.setAscending(true);
 
 		List<Statement> stats = repository.getStatements(filter)
 				.getStatements();

@@ -24,6 +24,7 @@ public class TestStatementFilterUtil {
 						"UTF-8");
 		checkRoundTrip(path + "agent=" + agent + "&limit=4");
 		checkRoundTrip(path + "agent=" + agent + "&related_activities=true");
+		checkRoundTrip(path + "ascending=true");
 
 	}
 

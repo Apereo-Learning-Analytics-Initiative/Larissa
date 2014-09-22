@@ -1,18 +1,16 @@
 package nl.uva.larissa.repository.couchdb;
 
+import static org.junit.Assert.*;
+
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import nl.uva.larissa.CouchDbConnectorFactory;
-import nl.uva.larissa.json.model.Activity;
 import nl.uva.larissa.json.model.Agent;
 import nl.uva.larissa.json.model.IFI;
-import nl.uva.larissa.json.model.Statement;
 import nl.uva.larissa.json.model.StatementResult;
-import nl.uva.larissa.json.model.Verb;
 import nl.uva.larissa.repository.DuplicateIdException;
 import nl.uva.larissa.repository.StatementFilter;
 import nl.uva.larissa.repository.StatementFilterUtil;
@@ -24,7 +22,6 @@ import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -81,11 +78,14 @@ public class ITAgentQuery {
 		StatementFilter filter = new StatementFilter();
 		filter.setAgent(getAgent("Aap@boom.bos"));
 		filter.setLimit(1);
+		filter.setAscending(true);
 		StatementResult result = query.getQueryResult(
 				repository.getConnector(), filter, QueryStrategy.NORMAL);
 
-		Assert.assertEquals(1, result.getStatements().size());
-		Assert.assertNotNull(result.getMore());
+		assertEquals(1, result.getStatements().size());
+		String firstMore = result.getMore();
+
+		assertNotNull(firstMore);
 
 		StatementFilter moreFilter;
 		for (int i = 0; i < 2; i++) {
@@ -93,15 +93,15 @@ public class ITAgentQuery {
 
 			result = getResult(query, moreFilter);
 
-			Assert.assertEquals(1, result.getStatements().size());
-			Assert.assertNotNull(result.getMore());
+			assertEquals(1, result.getStatements().size());
+			assertNotNull(result.getMore());
 		}
 		moreFilter = StatementFilterUtil.fromMoreUrl(result.getMore());
 
 		result = getResult(query, moreFilter);
 
-		Assert.assertEquals(1, result.getStatements().size());
-		Assert.assertEquals("", result.getMore());
+		assertEquals(1, result.getStatements().size());
+		assertEquals("", result.getMore());
 
 		Date firstDbStatDate = repository
 				.getStatement(dbKeys.get(2).getStatement().getId())
@@ -110,8 +110,17 @@ public class ITAgentQuery {
 		filter.setSince(firstDbStatDate);
 		filter.setLimit(null);
 		result = getResult(query, filter);
-		Assert.assertEquals(3, result.getStatements().size());
-		Assert.assertEquals("", result.getMore());
+		assertEquals(3, result.getStatements().size());
+		assertEquals("order is ascending",
+				dbKeys.get(4).getStatement().getId(), result.getStatements()
+						.get(2).getId());
+		assertEquals("", result.getMore());
+
+		filter.setAscending(false);
+		result = getResult(query, filter);
+		assertEquals(3, result.getStatements().size());
+		assertEquals("order is descending", dbKeys.get(2).getStatement()
+				.getId(), result.getStatements().get(2).getId());
 	}
 
 	private StatementResult getResult(StatementResultQuery query,
@@ -127,33 +136,11 @@ public class ITAgentQuery {
 		}
 	}
 
-	private static Agent getAgent(String email) {
+	static Agent getAgent(String email) {
 		Agent agent = new Agent();
 		agent.setIdentifier(new IFI());
 		agent.getIdentifier().setMbox(new IRI("mailto:" + email));
 		return agent;
-	}
-
-	private static class DbKey {
-
-		private Statement statement;
-
-		public DbKey(String email, String verbName) {
-			Agent agent = getAgent(email);
-			Verb verb = new Verb();
-			verb.setId(new IRI("http://www.uva.nl/verb/" + verbName));
-			this.statement = new Statement();
-			statement.setId(UUID.randomUUID().toString());
-			statement.setActor(agent);
-			statement.setVerb(verb);
-			Activity activity = new Activity();
-			activity.setId(new IRI("http://www.uva.nl/activity/other"));
-			statement.setStatementObject(activity);
-		}
-
-		public Statement getStatement() {
-			return statement;
-		}
 	}
 
 }

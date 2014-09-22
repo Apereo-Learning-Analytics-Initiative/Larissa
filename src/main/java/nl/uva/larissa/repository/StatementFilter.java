@@ -25,6 +25,7 @@ public class StatementFilter {
 	private Integer limit;
 	// TODO enum?
 	private String format;
+	private Boolean ascending;
 
 	// for more-URL
 	@QueryParam("startId")
@@ -46,6 +47,7 @@ public class StatementFilter {
 		until = filter.getUntil();
 		limit = filter.getLimit();
 		format = filter.getFormat();
+		ascending= filter.getAscending();
 		startId = filter.getStartId();
 	}
 
@@ -125,7 +127,8 @@ public class StatementFilter {
 				+ ", registration=" + registration + ", relatedActivities="
 				+ relatedActivities + ", relatedAgents=" + relatedAgents
 				+ ", since=" + since + ", until=" + until + ", limit=" + limit
-				+ ", format=" + format + ", startId=" + startId + "]";
+				+ ", format=" + format + ", ascending=" + ascending
+				+ ", startId=" + startId + "]";
 	}
 
 	public void setVoidedStatementId(String voidedStatementId) {
@@ -170,6 +173,14 @@ public class StatementFilter {
 
 	public void setStartId(String startId) {
 		this.startId = startId;
+	}
+
+	public Boolean getAscending() {
+		return ascending;
+	}
+
+	public void setAscending(Boolean ascending) {
+		this.ascending = ascending;
 	}
 
 }

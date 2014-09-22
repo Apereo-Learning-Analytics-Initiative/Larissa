@@ -178,6 +178,20 @@ public class StatementFilterUtil {
 				return result == null ? null : Boolean.toString(result);
 			}
 		},
+		ASCENDING("ascending") {
+
+			@Override
+			public void setValue(StatementFilter result, String value) {
+				result.setAscending(Boolean.valueOf(value));
+			}
+
+			@Override
+			public String getValueAsString(StatementFilter filter) {
+				Boolean result = filter.getAscending();
+				return result == null ? null : Boolean.toString(result);
+			}
+			
+		},
 		STARTID("startId") {
 			// FIXME validate
 

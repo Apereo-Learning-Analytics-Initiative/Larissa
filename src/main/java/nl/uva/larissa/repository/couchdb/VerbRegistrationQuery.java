@@ -18,10 +18,13 @@ public class VerbRegistrationQuery extends MapQuery {
 
 	@Override
 	protected void copyStartKeyValuesToFilter(StatementFilter filter,
-			StatementDocument nextDoc) {
+			StatementDocument nextDoc, boolean isAscending) {
 		filter.setStartId(nextDoc.getId());
-		filter.setSince(nextDoc.getStatement().getStored());
-
+		if (isAscending) {
+			filter.setSince(nextDoc.getStatement().getStored());
+		} else {
+			filter.setUntil(nextDoc.getStatement().getStored());
+		}
 	}
 
 	@Override
