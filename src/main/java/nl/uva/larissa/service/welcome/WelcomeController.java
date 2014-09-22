@@ -24,7 +24,7 @@ public class WelcomeController {
 		Map<String, String> model = new HashMap<String, String>();
 		long docCount = connector.getDbInfo().getDocCount();
 		// #statements = docCount - number of design-documents
-		model.put("statementCount", Long.toString(docCount - 2));
+		model.put("statementCount", Long.toString(docCount - 1));
 		return new Viewable("/welcome.jsp", model);
 	}
 }
