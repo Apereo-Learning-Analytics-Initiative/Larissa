@@ -23,13 +23,24 @@ public interface StatementRepository {
 	 *         Should be the id of the original Statement if it was not null.
 	 * 
 	 * @throws DuplicateIdException
-	 *             If Statement.id has a value that is already in use. <br>
+	 *             If statement.id has a value that is already in use.
+	 * 
+	 * @throws VoidingTargetException
+	 *             If statement is voiding but refers to an invalid target for
+	 *             voiding
+	 * 
+	 * @throws UnknownStatementException
+	 *             If statement.object.objectType=='StatementRef' and targets an
+	 *             unknown statement-id <br>
 	 * <br>
 	 *             <b>side-effect</b> if Statement.id was null, Statement.id may
 	 *             be set to the return-value.
+	 * 
+	 * 
 	 */
 	public String storeStatement(Statement statement)
-			throws DuplicateIdException, VoidingTargetException;
+			throws DuplicateIdException, VoidingTargetException,
+			UnknownStatementException;
 
 	/**
 	 * Retrieves a Statement

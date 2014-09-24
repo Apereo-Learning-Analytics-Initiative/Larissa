@@ -14,6 +14,7 @@ import nl.uva.larissa.json.model.StatementResult;
 import nl.uva.larissa.repository.DuplicateIdException;
 import nl.uva.larissa.repository.StatementFilter;
 import nl.uva.larissa.repository.StatementFilterUtil;
+import nl.uva.larissa.repository.UnknownStatementException;
 import nl.uva.larissa.repository.VoidingTargetException;
 import nl.uva.larissa.repository.couchdb.CouchDbStatementRepository.QueryStrategy;
 
@@ -62,7 +63,8 @@ public class ITAgentQuery {
 	}
 
 	@Test
-	public void testQuery() throws DuplicateIdException, VoidingTargetException {
+	public void testQuery() throws DuplicateIdException,
+			VoidingTargetException, UnknownStatementException {
 		// the order is important! determines stored-value ordering
 		/*
 		 * equivalent in CouchDB map [A,A,3] [A,K,1] [A,S,4] [A,K,5] [N,S,2]
@@ -130,7 +132,7 @@ public class ITAgentQuery {
 	}
 
 	private void populateDb(List<DbKey> asList) throws DuplicateIdException,
-			VoidingTargetException {
+			VoidingTargetException, UnknownStatementException {
 		for (DbKey dbKey : asList) {
 			repository.storeStatement(dbKey.getStatement());
 		}

@@ -36,6 +36,7 @@ import nl.uva.larissa.json.model.StatementResult;
 import nl.uva.larissa.repository.DuplicateIdException;
 import nl.uva.larissa.repository.StatementFilter;
 import nl.uva.larissa.repository.StatementRepository;
+import nl.uva.larissa.repository.UnknownStatementException;
 import nl.uva.larissa.repository.VoidingTargetException;
 
 import org.apache.abdera.i18n.iri.IRI;
@@ -87,7 +88,8 @@ public class StatementsResource {
 			}
 			statement.setId(id);
 			repository.storeStatement(statement);
-		} catch (ParseException | ValidationException | VoidingTargetException e) {
+		} catch (ParseException | ValidationException | VoidingTargetException
+				| UnknownStatementException e) {
 			return badRequest(e);
 		} catch (DuplicateIdException e) {
 			// TODO spec mentions checking if statement is the same (although
@@ -137,7 +139,8 @@ public class StatementsResource {
 				List<Statement> statements = parser.parseStatementList(json);
 				return validateAndStore(statements);
 			}
-		} catch (ParseException | ValidationException | VoidingTargetException e) {
+		} catch (ParseException | ValidationException | VoidingTargetException
+				| UnknownStatementException e) {
 			return badRequest(e);
 		} catch (DuplicateIdException e) {
 			return dupeResponse(e);

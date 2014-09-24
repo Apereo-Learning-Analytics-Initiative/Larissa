@@ -1,5 +1,8 @@
 package nl.uva.larissa.repository.couchdb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import nl.uva.larissa.json.model.Statement;
 
 import org.ektorp.support.CouchDbDocument;
@@ -21,6 +24,16 @@ public class StatementDocument extends CouchDbDocument {
 	private Statement statement;
 
 	private Type type = Type.PLAIN;
+
+	private List<Referrer> referrers = new ArrayList<>();
+	
+	public List<Referrer> getReferrers() {
+		return referrers;
+	}
+
+	public void setReferrers(List<Referrer> referrers) {
+		this.referrers = referrers;
+	}
 
 	public Statement getStatement() {
 		return statement;

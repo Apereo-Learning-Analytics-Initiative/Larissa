@@ -11,6 +11,7 @@ import nl.uva.larissa.json.model.StatementResult;
 import nl.uva.larissa.repository.DuplicateIdException;
 import nl.uva.larissa.repository.StatementFilter;
 import nl.uva.larissa.repository.StatementFilterUtil;
+import nl.uva.larissa.repository.UnknownStatementException;
 import nl.uva.larissa.repository.VoidingTargetException;
 import nl.uva.larissa.repository.couchdb.CouchDbStatementRepository.QueryStrategy;
 
@@ -57,7 +58,8 @@ public class ITMapQuery {
 	}
 
 	@Test
-	public void testOrder() throws DuplicateIdException, VoidingTargetException {
+	public void testOrder() throws DuplicateIdException,
+			VoidingTargetException, UnknownStatementException {
 
 		List<DbKey> dbKeys = Arrays.asList(new DbKey("Aap@boom.bos", "Klimt"),
 				new DbKey("Aap@boom.bos", "Aapt"), new DbKey("Aap@boom.bos",
@@ -243,7 +245,7 @@ public class ITMapQuery {
 	}
 
 	private void populateDb(List<DbKey> asList) throws DuplicateIdException,
-			VoidingTargetException {
+			VoidingTargetException, UnknownStatementException {
 		for (DbKey dbKey : asList) {
 			repository.storeStatement(dbKey.getStatement());
 		}

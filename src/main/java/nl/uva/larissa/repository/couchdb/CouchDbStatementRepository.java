@@ -23,6 +23,7 @@ import nl.uva.larissa.json.model.StatementResult;
 import nl.uva.larissa.repository.DuplicateIdException;
 import nl.uva.larissa.repository.StatementFilter;
 import nl.uva.larissa.repository.StatementRepository;
+import nl.uva.larissa.repository.UnknownStatementException;
 import nl.uva.larissa.repository.Verbs;
 import nl.uva.larissa.repository.VoidingTargetException;
 import nl.uva.larissa.repository.couchdb.StatementDocument.Type;
@@ -111,12 +112,77 @@ public class CouchDbStatementRepository implements StatementRepository {
 
 	@Override
 	public String storeStatement(Statement statement)
-			throws DuplicateIdException, VoidingTargetException {
+			throws DuplicateIdException, VoidingTargetException,
+			UnknownStatementException {
 		if (isVoidingStatement(statement)) {
 			return voidAndReturnDocs(statement).voiding().getId();
+		} else if (isReferringStatement(statement)) {
+			return storeReferringStatement(statement);
 		}
 		StatementDocument cDBStatement = storeStatementAndReturnDoc(statement);
 		return cDBStatement.getId();
+	}
+
+	private boolean isReferringStatement(Statement statement) {
+		return statement.getStatementObject() instanceof StatementRef;
+	}
+
+	private String storeReferringStatement(Statement referringStatement)
+			throws UnknownStatementException, DuplicateIdException {
+		StatementRef ref = (StatementRef) referringStatement
+				.getStatementObject();
+		String referredId = ref.getId();
+		StatementDocument referredDoc;
+		try {
+
+			referredDoc = connector.get(StatementDocument.class, referredId);
+		} catch (DocumentNotFoundException e) {
+			throw new UnknownStatementException(String.format(
+					"Statement %s refers to a non-existing statement ID: %s",
+					referringStatement.getId(), referredId));
+		}
+		List<StatementDocument> refChain = new ArrayList<StatementDocument>();
+
+		String result = storeStatementAndReturnDoc(referringStatement).getId();
+
+		Referrer referrer = Referrer.fromStatement(referringStatement);
+
+		// add Referrer info to all statements in the reference-chain
+		while (referredDoc != null) {
+			referredDoc.getReferrers().add(referrer);
+			refChain.add(referredDoc);
+			Statement referredStatement = referredDoc.getStatement();
+			if (isReferringStatement(referredStatement)) {
+				referredId = ((StatementRef) referredStatement
+						.getStatementObject()).getId();
+				try {
+					referredDoc = connector.get(StatementDocument.class,
+							referredId);
+				} catch (DocumentNotFoundException e) {
+					LOGGER.error(String
+							.format("While updating reference-chain starting at statement %s: statement %s refers to non-existing id %s",
+									result, referredStatement.getId(),
+									referredId));
+					referredDoc = null;
+				}
+			} else {
+				referredDoc = null;
+			}
+		}
+
+		for (StatementDocument doc : refChain) {
+			try {
+				connector.update(doc);
+			} catch (UpdateConflictException e) {
+				// TODO lock/resolve
+				LOGGER.error(
+						"While updating reference chain starting at statement %s; conflict(s) updating %s: %s",
+						result, doc.getId(), doc.getConflicts());
+				break;
+			}
+		}
+
+		return result;
 	}
 
 	private String getVoidingTarget(Statement statement) {

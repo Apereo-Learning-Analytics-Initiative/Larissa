@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +19,14 @@ import nl.uva.larissa.json.model.ActivityDefinition;
 import nl.uva.larissa.json.model.Agent;
 import nl.uva.larissa.json.model.IFI;
 import nl.uva.larissa.json.model.Statement;
+import nl.uva.larissa.json.model.StatementBuilder;
 import nl.uva.larissa.json.model.StatementRef;
 import nl.uva.larissa.json.model.StatementResult;
 import nl.uva.larissa.json.model.Verb;
 import nl.uva.larissa.repository.DuplicateIdException;
 import nl.uva.larissa.repository.StatementFilter;
 import nl.uva.larissa.repository.StatementFilterUtil;
+import nl.uva.larissa.repository.UnknownStatementException;
 import nl.uva.larissa.repository.VoidingTargetException;
 
 import org.apache.abdera.i18n.iri.IRI;
@@ -76,7 +79,8 @@ public class ITCouchDBStatementRepository {
 	}
 
 	@Test
-	public void testStore() throws DuplicateIdException, VoidingTargetException {
+	public void testStore() throws DuplicateIdException,
+			VoidingTargetException, UnknownStatementException {
 		Statement testStatement = createStatement();
 		String uuid = UUID.randomUUID().toString();
 		testStatement.setId(uuid);
@@ -153,7 +157,7 @@ public class ITCouchDBStatementRepository {
 
 	@Test
 	public void testGetLimitedStatements() throws DuplicateIdException,
-			VoidingTargetException {
+			VoidingTargetException, UnknownStatementException {
 		for (int i = 0; i < 10; i++) {
 			Statement statement = createStatement();
 			String uuid = UUID.randomUUID().toString();
@@ -181,7 +185,7 @@ public class ITCouchDBStatementRepository {
 
 	@Test
 	public void testGetSinceStatements() throws DuplicateIdException,
-			VoidingTargetException {
+			VoidingTargetException, UnknownStatementException {
 		long time = -1;
 		for (int i = 0; i < 10; i++) {
 			Statement statement = createStatement();
@@ -216,7 +220,8 @@ public class ITCouchDBStatementRepository {
 
 	@Test
 	public void testGetVerbId() throws DuplicateIdException,
-			InterruptedException, VoidingTargetException {
+			InterruptedException, VoidingTargetException,
+			UnknownStatementException {
 		long starttime = -1;
 		long endtime = -1;
 		for (int i = 0; i < 10; i++) {
@@ -255,7 +260,7 @@ public class ITCouchDBStatementRepository {
 
 	@Test
 	public void testGetAgent() throws DuplicateIdException,
-			VoidingTargetException {
+			VoidingTargetException, UnknownStatementException {
 		for (int i = 0; i < 10; i++) {
 			Statement statement = createStatement();
 			String uuid = UUID.randomUUID().toString();
@@ -281,7 +286,8 @@ public class ITCouchDBStatementRepository {
 	}
 
 	@Test
-	public void testVoid() throws DuplicateIdException, VoidingTargetException {
+	public void testVoid() throws DuplicateIdException, VoidingTargetException,
+			UnknownStatementException {
 		Statement statement = createStatement();
 		String uuid = UUID.randomUUID().toString();
 		statement.setId(uuid);
@@ -353,7 +359,7 @@ public class ITCouchDBStatementRepository {
 
 	@Test
 	public void testVoidMultiple() throws DuplicateIdException,
-			VoidingTargetException {
+			VoidingTargetException, UnknownStatementException {
 		Statement statement1 = createStatement();
 
 		String uuid1 = repository.storeStatement(statement1);
@@ -385,6 +391,67 @@ public class ITCouchDBStatementRepository {
 
 		stats = repository.getVoidedStatement(uuid1).getStatements();
 		assertEquals(1, stats.size());
+	}
+
+	@Test
+	public void testGetReferring() throws Exception {
+		Statement statZ = StatementBuilder.statement().randomId()
+				.actor("ben@uva.nl").verb("passed")
+				.activity("explosivestraining")
+				.contextWithRegistration(UUID.randomUUID().toString()).build();
+
+		Statement statY = StatementBuilder.statement().randomId()
+				.actor("andrew@uva.nl").verb("confirms")
+				.statementRef(statZ.getId()).build();
+
+		Statement statX = StatementBuilder.statement().randomId()
+				.actor("tom@uva.nl").verb("mentioned")
+				.statementRef(statY.getId()).build();
+
+		repository.storeStatement(statZ);
+		repository.storeStatement(statY);
+		repository.storeStatement(statX);
+		// repository.storeStatements(Arrays.asList(statZ, statY, statX));
+
+		StatementFilter filter = new StatementFilter();
+
+		assertEquals(3, repository.getStatements(filter).getStatements().size());
+
+		filter.setVerb(new IRI("passed"));
+
+		StatementResult result = repository.getStatements(filter);
+
+		List<Statement> statements = result.getStatements();
+		assertEquals(3, statements.size());
+		assertEquals(
+				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId(), statements.get(2).getId()));
+
+		filter.setVerb(null);
+
+		filter.setRegistration(statZ.getContext().getRegistration());
+
+		result = repository.getStatements(filter);
+		statements = result.getStatements();
+		assertEquals(3, statements.size());
+		assertEquals(
+				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId(), statements.get(2).getId()));
+
+		filter.setRegistration(null);
+
+		filter.setActivity(new IRI("explosivestraining"));
+
+		result = repository.getStatements(filter);
+		statements = result.getStatements();
+		assertEquals(3, statements.size());
+		assertEquals(
+				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId(), statements.get(2).getId()));
+
 	}
 
 	Agent createAgent(String emailAddress) {
