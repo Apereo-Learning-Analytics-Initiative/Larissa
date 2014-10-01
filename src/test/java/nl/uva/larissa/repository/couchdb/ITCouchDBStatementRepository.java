@@ -452,6 +452,13 @@ public class ITCouchDBStatementRepository {
 				Arrays.asList(statements.get(0).getId(), statements.get(1)
 						.getId(), statements.get(2).getId()));
 
+		filter.setVerb(new IRI("confirms"));
+
+		result = repository.getStatements(filter);
+		assertEquals(2, statements.size());
+		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId()));
 	}
 
 	Agent createAgent(String emailAddress) {

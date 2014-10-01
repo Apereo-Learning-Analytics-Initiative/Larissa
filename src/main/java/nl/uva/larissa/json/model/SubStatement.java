@@ -1,5 +1,7 @@
 package nl.uva.larissa.json.model;
 
+import java.util.Date;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -20,6 +22,10 @@ public class SubStatement implements StatementObject {
 	@JsonProperty("object")
 	@Valid
 	private StatementObject statementObject;
+	@Valid
+	private Context context;
+	private Result result;
+	private Date timestamp;
 
 	public Actor getActor() {
 		return actor;
@@ -43,5 +49,29 @@ public class SubStatement implements StatementObject {
 
 	public void setStatementObject(StatementObject statementObject) {
 		this.statementObject = statementObject;
+	}
+
+	public Context getContext() {
+		return context;
+	}
+
+	public Result getResult() {
+		return result;
+	}
+
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
+	}
+
+	public void setResult(Result result) {
+		this.result = result;
+	}
+
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
 	}
 }

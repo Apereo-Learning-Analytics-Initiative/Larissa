@@ -8,6 +8,7 @@ var map = function(doc) {
 	if (doc.type === 'VOIDED') {
 		return;
 	}
+
 	var auth = doc.authority;
 	var verb = doc.verb.id;
 	var registration = doc.context ? doc.context.registration : null;
@@ -29,22 +30,27 @@ var map = function(doc) {
 		var refdoc = {
 			_id : ref.id
 		};
-		if (ref.verb !== verb) {
-			emit([ ref.auth, verb, null, ref.stored ], refdoc);
-			emit([ 'ALL', verb, null, ref.stored ], refdoc);
-			if (ref.registration) {
-				emit([ ref.auth, verb, ref.registration, ref.stored ], refdoc);
-				emit([ 'ALL', verb, ref.registration, ref.stored ], refdoc);
+		var refAuth = ref.authority;
+		var refVerb = ref.verb.id;
+		var refRegistration = ref.context ? ref.context.registration : null;
+		var refStored = ref.stored;
+
+		if (refVerb !== verb) {
+			emit([ refAuth, verb, null, refStored ], refdoc);
+			emit([ 'ALL', verb, null, refStored ], refdoc);
+			if (refRegistration) {
+				emit([ refAuth, verb, refRegistration, refStored ], refdoc);
+				emit([ 'ALL', verb, refRegistration, refStored ], refdoc);
 			}
 		}
-		if (registration && ref.registration !== registration) {
-			emit([ ref.auth, null, registration, ref.stored ], refdoc);
-			emit([ 'ALL', null, registration, ref.stored ], refdoc);
-			emit([ ref.auth, ref.verb, registration, ref.stored ], refdoc);
-			emit([ 'ALL', ref.verb, registration, ref.stored ], refdoc);
-			if (ref.verb !== verb) {
-				emit([ ref.auth, verb, registration, ref.stored ], refdoc);
-				emit([ 'ALL', verb, registration, ref.stored ], refdoc);
+		if (registration && refRegistration !== registration) {
+			emit([ refAuth, null, registration, refStored ], refdoc);
+			emit([ 'ALL', null, registration, refStored ], refdoc);
+			emit([ refAuth, refVerb, registration, refStored ], refdoc);
+			emit([ 'ALL', refVerb, registration, refStored ], refdoc);
+			if (refVerb !== verb) {
+				emit([ refAuth, verb, registration, refStored ], refdoc);
+				emit([ 'ALL', verb, registration, refStored ], refdoc);
 			}
 		}
 
@@ -59,6 +65,7 @@ function emit(array, value) {
 }
 
 var doc = {
+	"type" : "PLAIN",
 	"id" : "a-5",
 	"stored" : "2014-04-23T15:23:19.154Z",
 	"actor" : {
@@ -88,22 +95,29 @@ if (expected !== allRows.length) {
 var doc2 = {
 	"referrers" : [ {
 		"id" : "Y",
-		"auth" : {
+		"authority" : {
 			"objectType" : "Agent",
 			"mbox" : "Y@example.com"
 		},
-		"verb" : "Yverb",
-		"registration" : "Yreg",
+		"verb" : {
+			"id" : "Yverb"
+		},
+		"context" : {
+			"registration" : "Yreg"
+		},
 		"stored" : "2013-04-23T15:23:19.154Z"
 	}, {
 		"id" : "X",
-		"auth" : {
+		"authority" : {
 			"objectType" : "Agent",
 			"mbox" : "X@example.com"
 		},
-		"verb" : "Zverb",
+		"verb" : {
+			"id" : "Zverb"
+		},
 		"stored" : "2012-04-23T15:23:19.154Z"
 	} ],
+	"type" : "PLAIN",
 	"id" : "Z",
 	"stored" : "2014-04-23T15:23:19.154Z",
 	"actor" : {

@@ -20,13 +20,11 @@ public class StatementBuilder {
 	final Validator validator = Validation.buildDefaultValidatorFactory()
 			.getValidator();
 
-	private String id = null;
-	private String email = null;
-	private String verbId = null;
-	private String referenceId = null;
-
-	private String activityId = null;
-
+	private String id;
+	private String email;
+	private String verbId;
+	private String referenceId;
+	private String activityId;
 	private String registration;
 
 	private StatementBuilder() {
@@ -54,6 +52,11 @@ public class StatementBuilder {
 
 	public Statement build() {
 		Statement result = new Statement();
+		Agent authority = new Agent();
+		IFI authIfi = new IFI();
+		authIfi.setMbox(new IRI("test@example.com"));
+		authority.setIdentifier(authIfi);
+		result.setAuthority(authority);
 		result.setId(id);
 
 		Verb verb = new Verb();
@@ -84,7 +87,7 @@ public class StatementBuilder {
 		if (registration != null) {
 			Context context = new Context();
 			context.setRegistration(registration);
-			
+
 			result.setContext(context);
 		}
 		Set<ConstraintViolation<Statement>> violations = validator

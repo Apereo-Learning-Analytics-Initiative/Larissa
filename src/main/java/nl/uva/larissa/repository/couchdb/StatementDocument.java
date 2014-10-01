@@ -25,13 +25,13 @@ public class StatementDocument extends CouchDbDocument {
 
 	private Type type = Type.PLAIN;
 
-	private List<Referrer> referrers = new ArrayList<>();
+	private List<Statement> referrers = new ArrayList<>();
 	
-	public List<Referrer> getReferrers() {
+	public List<Statement> getReferrers() {
 		return referrers;
 	}
 
-	public void setReferrers(List<Referrer> referrers) {
+	public void setReferrers(List<Statement> referrers) {
 		this.referrers = referrers;
 	}
 

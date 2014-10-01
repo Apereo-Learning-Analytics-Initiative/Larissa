@@ -6,9 +6,13 @@
 
 var map = function(doc) {
 
+	if (doc.type === 'VOIDED') {
+		return;
+	}
+
 	function addIfNotExists(string, array) {
-		if (array.indexOf(string) === -1) {
-			array[array.length] = string;
+		if (array.indexOf(string) < 0) {
+			array.push(string);
 		}
 	}
 
@@ -107,18 +111,13 @@ var map = function(doc) {
 		return result;
 	}
 
-	if (doc.type === 'VOIDED') {
-		return;
-	}
-	
 	var agents = getAgents(doc, false);
 	var related_agents = getAgents(doc, true);
 
 	var activities = getActivities(doc, false);
 	var related_activities = getActivities(doc, true);
 
-	var registration = (doc.context && doc.context.registration) ? doc.context.registration
-			: null;
+	var registration = doc.context ? doc.context.registration : null;
 
 	var auth = doc.authority;
 	var verb = doc.verb.id;
@@ -168,13 +167,208 @@ var map = function(doc) {
 		doEmit(3, null, related_activities[i]);
 		doEmit(4, null, related_activities[i]);
 	}
+
+	function diff(arrA, arrB) {
+		var result = [];
+		for (var i = 0; i < arrA.length; i++) {
+			if (arrB.indexOf(arrA[i]) < 0) {
+				result.push(arrA[i]);
+			}
+		}
+		return result;
+	}
+	function sum(arrA, arrB) {
+		var result = arrA.slice();
+		for (var i = 0; i < arrB.length; i++) {
+			if (result.indexOf(arrB[i]) < 0) {
+				result.push(arrB[i]);
+			}
+		}
+		return result;
+	}
+
+	function doRefEmit(auth, level, agent, activity, verb, registration,
+			stored, docid) {
+		if (agent) {
+			agent = JSON.parse(agent);
+		}
+		emit([ auth, level, agent, activity, verb, registration, stored ],
+				docid);
+	}
+
+	for ( var z in doc.referrers) {
+		var ref = doc.referrers[z];
+
+		var refdoc = {
+			_id : ref.id
+		};
+
+		var refAgents = getAgents(ref, false);
+		var refRelatedAgents = getAgents(ref, true);
+		var refActivities = getActivities(ref, false);
+		var refRelatedActivities = getActivities(ref, true);
+		var refRegistration = ref.context ? ref.context.registration : null;
+		var refAuth = ref.authority;
+		var refVerb = ref.verb.id;
+		var refStored = ref.stored;
+
+		var agentsNotInRef = diff(agents, refAgents);
+		var relatedAgentsNotInRef = diff(related_agents, refRelatedAgents);
+
+		var activitiesNotInRef = diff(activities, refActivities);
+		var relatedActivitesNotInRef = diff(activities, refRelatedActivities);
+
+		var allAgents = sum(agents, refAgents);
+		var allActivities = sum(activities, refActivities);
+		var allRelatedAgents = sum(related_agents, refRelatedAgents);
+		var allRelatedActivities = sum(related_activities, refRelatedActivities);
+
+		var allAgentsMinusNotInRef = diff(allAgents, agentsNotInRef);
+		var allRelatedAgentsMinusNotInRef = diff(allRelatedAgents,
+				relatedAgentsNotInRef);
+
+		var allVerbs = (verb === refVerb) ? [ verb, null ] : [ verb, refVerb,
+				null ];
+		var allRegistrations = [ null ];
+		if (registration) {
+			allRegistrations.push(registration);
+		}
+		if (refRegistration && registration !== refRegistration) {
+			allRegistrations.push(refRegistration);
+		}
+
+		var refAuths = [ refAuth, 'ALL' ];
+
+		// relation: 1= none related, 2= agent_related, 3= activity_related,
+		// 4=
+		// both related
+		for (var a = 0; a < refAuths.length; a++) {
+			for (var b = 0; b < allVerbs.length; b++) {
+				for (var c = 0; c < allRegistrations.length; c++) {
+
+					var level = 1; // none related
+
+					// [agentsNotInRef, allActivities]
+					for (var d = 0; d < agentsNotInRef.length; d++) {
+						for (var e = 0; e < allActivities.length; e++) {
+							doRefEmit(refAuths[a], level, agentsNotInRef[d],
+									allActivities[e], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+
+						}
+						doRefEmit(refAuths[a], level, agentsNotInRef[d], null,
+								allVerbs[b], allRegistrations[c], refStored,
+								refdoc);
+					}
+					// [agentsMinusNotInRef, activitiesNotInRef]
+					for (var d = 0; d < activitiesNotInRef.length; d++) {
+						for (var e = 0; e < allAgentsMinusNotInRef.length; e++) {
+							doRefEmit(refAuths[a], level,
+									allAgentsMinusNotInRef[e],
+									activitiesNotInRef[d], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+						}
+						doRefEmit(refAuths[a], level, null,
+								activitiesNotInRef[d], allVerbs[b],
+								allRegistrations[c], refStored, refdoc);
+
+					}
+					var level = 2; // agent_related
+
+					// [relatedAgentsNotInRef, allActivities]
+					for (var d = 0; d < relatedAgentsNotInRef.length; d++) {
+						for (var e = 0; e < allActivities.length; e++) {
+							doRefEmit(refAuths[a], level,
+									relatedAgentsNotInRef[d], allActivities[e],
+									allVerbs[b], allRegistrations[c],
+									refStored, refdoc);
+
+						}
+						doRefEmit(refAuths[a], level, relatedAgentsNotInRef[d],
+								null, allVerbs[b], allRegistrations[c],
+								refStored, refdoc);
+					}
+					// [relatedAgentsMinusNotInRef, activitiesNotInRef]
+					for (var d = 0; d < activitiesNotInRef.length; d++) {
+						for (var e = 0; e < allRelatedAgentsMinusNotInRef.length; e++) {
+							doRefEmit(refAuths[a], level,
+									allRelatedAgentsMinusNotInRef[e],
+									activitiesNotInRef[d], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+						}
+						doRefEmit(refAuths[a], level, null,
+								activitiesNotInRef[d], allVerbs[b],
+								allRegistrations[c], refStored, refdoc);
+
+					}
+					var level = 3; // activity_related
+
+					// [agentsNotInRef, allRelatedActivities]
+					for (var d = 0; d < agentsNotInRef.length; d++) {
+						for (var e = 0; e < allRelatedActivities.length; e++) {
+							doRefEmit(refAuths[a], level, agentsNotInRef[d],
+									allRelatedActivities[e], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+
+						}
+						doRefEmit(refAuths[a], level, agentsNotInRef[d], null,
+								allVerbs[b], allRegistrations[c], refStored,
+								refdoc);
+					}
+					// [agentsMinusNotInRef, relatedActivitiesNotInRef]
+					for (var d = 0; d < relatedActivitesNotInRef.length; d++) {
+						for (var e = 0; e < allAgentsMinusNotInRef.length; e++) {
+							doRefEmit(refAuths[a], level,
+									allAgentsMinusNotInRef[e],
+									relatedActivitesNotInRef[d], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+						}
+						doRefEmit(refAuths[a], level, null,
+								relatedActivitesNotInRef[d], allVerbs[b],
+								allRegistrations[c], refStored, refdoc);
+
+					}
+					var level = 4; // agent_related & activity_related
+
+					// [relatedAgentsNotInRef, allRelatedActivities]
+					for (var d = 0; d < relatedAgentsNotInRef.length; d++) {
+						for (var e = 0; e < allRelatedActivities.length; e++) {
+							doRefEmit(refAuths[a], level,
+									relatedAgentsNotInRef[d],
+									allRelatedActivities[e], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+
+						}
+						doRefEmit(refAuths[a], level, relatedAgentsNotInRef[d],
+								null, allVerbs[b], allRegistrations[c],
+								refStored, refdoc);
+					}
+					// [relatedAgentsMinusNotInRef,
+					// relatedActivitiesNotInRef]
+					for (var d = 0; d < relatedActivitesNotInRef.length; d++) {
+						for (var e = 0; e < allRelatedAgentsMinusNotInRef.length; e++) {
+							doRefEmit(refAuths[a], level,
+									allRelatedAgentsMinusNotInRef[e],
+									relatedActivitesNotInRef[d], allVerbs[b],
+									allRegistrations[c], refStored, refdoc);
+						}
+						doRefEmit(refAuths[a], level, null,
+								relatedActivitesNotInRef[d], allVerbs[b],
+								allRegistrations[c], refStored, refdoc);
+
+					}
+				}
+			}
+		}
+
+	}
 };
 
 var allRows = [];
 
-function emit(array) {
-	allRows[allRows.length] = JSON.stringify(array);
-
+function emit(array, value) {
+	allRows[allRows.length] = JSON.stringify(array) + ','
+			+ (value ? JSON.stringify(value) : 'null');
 }
 
 var doc = {
@@ -203,6 +397,18 @@ var doc = {
 		"mbox" : "bla3"
 	}
 };
+
+map(doc);
+
+var expected = 68;
+
+console.log("test one "
+		+ (allRows.length === expected ? "was succesful" : "failed; expected "
+				+ expected + " rows but was " + allRows.length + "\n"));
+if (expected !== allRows.length) {
+	allRows.sort();
+	console.log(allRows);
+}
 
 var doc2 = {
 	"_id" : "aap",
@@ -243,7 +449,144 @@ var doc2 = {
 	},
 	"stored" : "2014-05-26T10:28:20.308Z"
 };
-map(doc);
+
+allRows = [];
+
+map(doc2);
+
+expected = 128;
+
+console.log("test two "
+		+ (allRows.length === expected ? "was succesful" : "failed; expected "
+				+ expected + " rows but was " + allRows.length + "\n"));
+if (expected !== allRows.length) {
+	allRows.sort();
+	console.log(allRows);
+}
+
+doc3 = {
+	"referrers" : [ {
+		"id" : "Y",
+		"authority" : {
+			"objectType" : "Agent",
+			"mbox" : "Y@example.com"
+		},
+		"actor" : {
+			"objectType" : "Agent",
+			"mbox" : "Y@example.com"
+		},
+		"verb" : {
+			"id" : "Yverb"
+		},
+		"object" : {
+			"objectType" : "Activity",
+			"id" : "Yactivity"
+		},
+		"context" : {
+			"registration" : "Yreg"
+		},
+		"stored" : "2013"
+	} ],
+	"id" : "Z",
+	"stored" : "2014",
+	"actor" : {
+		"objectType" : "Agent",
+		"mbox" : "Zactor@example.com"
+	},
+	"verb" : {
+		"id" : "Zverb"
+	},
+	"object" : {
+		"objectType" : "Agent",
+		"mbox" : "Zobject@example.com"
+	},
+	"context" : {
+		"contextActivities" : {
+			"other" : [ {
+				"id" : "safetydance"
+			} ]
+		}
+	},
+	"authority" : {
+		"objectType" : "Agent",
+		"mbox" : "Zauthority"
+	}
+};
+
+allRows = [];
+
+map(doc3);
+
+expected = 368;
+
+function reportDupes(sortedArray) {
+	var results = [];
+	for (var i = 0; i < sortedArray.length - 1; i++) {
+		if (sortedArray[i + 1] == sortedArray[i]) {
+			results.push(sortedArray[i]);
+		}
+	}
+	return results;
+}
+
+var dupes = reportDupes(allRows);
+
+if (dupes.length > 0 || allRows.length != expected) {
+	if (dupes.length > 0) {
+		console.log("test three failed; dupes emited:");
+		console.log(dupes);
+	} else {
+		console.log("test three failed; expected " + expected
+				+ " rows but was " + allRows.length);
+		allRows.sort();
+		console.log(allRows);
+	}
+} else {
+	console.log("test three was succesful");
+}
+
+doc4 = {
+	"_id" : "03226b5d-d03e-421d-aeed-20e5be5147d8",
+	"_rev" : "2-55e19138393f3881ae744517072d6168",
+	"id" : "03226b5d-d03e-421d-aeed-20e5be5147d8",
+	"actor" : {
+		"objectType" : "Agent",
+		"mbox" : "mailto:andrew@uva.nl"
+	},
+	"verb" : {
+		"id" : "confirms"
+	},
+	"object" : {
+		"objectType" : "StatementRef",
+		"id" : "6ec8a804-33dd-4d94-b6bf-54e35b5b668b"
+	},
+	"stored" : "2014-10-01T16:21:32.237Z",
+	"authority" : {
+		"objectType" : "Agent",
+		"mbox" : "test@example.com"
+	},
+	"type" : "PLAIN",
+	"referrers" : [ {
+		"id" : "db71c502-56a3-4701-a020-37bed42cdef0",
+		"actor" : {
+			"objectType" : "Agent",
+			"mbox" : "mailto:tom@uva.nl"
+		},
+		"verb" : {
+			"id" : "mentioned"
+		},
+		"object" : {
+			"objectType" : "StatementRef",
+			"id" : "03226b5d-d03e-421d-aeed-20e5be5147d8"
+		},
+		"stored" : "2014-10-01T16:21:32.276Z",
+		"authority" : {
+			"objectType" : "Agent",
+			"mbox" : "test@example.com"
+		}
+	} ]
+};
+allRows = [];
+map(doc4);
 allRows.sort();
 console.log(allRows);
-console.log(allRows.length);
