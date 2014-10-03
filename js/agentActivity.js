@@ -196,172 +196,120 @@ var map = function(doc) {
 				docid);
 	}
 
-	for ( var z in doc.referrers) {
-		var ref = doc.referrers[z];
-
-		var refdoc = {
-			_id : ref.id
+	function doRefEmitForLevel(referrerAuths, level, verbs, registrations,
+			agentsOnlyInReferee, agentsMinusOnlyInReferee, activities,
+			activitiesOnlyInReferee, referrerStored, referrerId) {
+		var referrerId = {
+			_id : referrerId
 		};
-
-		var refAgents = getAgents(ref, false);
-		var refRelatedAgents = getAgents(ref, true);
-		var refActivities = getActivities(ref, false);
-		var refRelatedActivities = getActivities(ref, true);
-		var refRegistration = ref.context ? ref.context.registration : null;
-		var refAuth = ref.authority;
-		var refVerb = ref.verb.id;
-		var refStored = ref.stored;
-
-		var agentsNotInRef = diff(agents, refAgents);
-		var relatedAgentsNotInRef = diff(related_agents, refRelatedAgents);
-
-		var activitiesNotInRef = diff(activities, refActivities);
-		var relatedActivitesNotInRef = diff(activities, refRelatedActivities);
-
-		var allAgents = sum(agents, refAgents);
-		var allActivities = sum(activities, refActivities);
-		var allRelatedAgents = sum(related_agents, refRelatedAgents);
-		var allRelatedActivities = sum(related_activities, refRelatedActivities);
-
-		var allAgentsMinusNotInRef = diff(allAgents, agentsNotInRef);
-		var allRelatedAgentsMinusNotInRef = diff(allRelatedAgents,
-				relatedAgentsNotInRef);
-
-		var allVerbs = (verb === refVerb) ? [ verb, null ] : [ verb, refVerb,
-				null ];
-		var allRegistrations = [ null ];
-		if (registration) {
-			allRegistrations.push(registration);
-		}
-		if (refRegistration && registration !== refRegistration) {
-			allRegistrations.push(refRegistration);
-		}
-
-		var refAuths = [ refAuth, 'ALL' ];
-
-		// relation: 1= none related, 2= agent_related, 3= activity_related,
-		// 4=
-		// both related
-		for (var a = 0; a < refAuths.length; a++) {
-			for (var b = 0; b < allVerbs.length; b++) {
-				for (var c = 0; c < allRegistrations.length; c++) {
-
-					var level = 1; // none related
-
-					// [agentsNotInRef, allActivities]
-					for (var d = 0; d < agentsNotInRef.length; d++) {
-						for (var e = 0; e < allActivities.length; e++) {
-							doRefEmit(refAuths[a], level, agentsNotInRef[d],
-									allActivities[e], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
+		for (var a = 0; a < referrerAuths.length; a++) {
+			for (var b = 0; b < verbs.length; b++) {
+				for (var c = 0; c < registrations.length; c++) {
+					for (var d = 0; d < agentsOnlyInReferee.length; d++) {
+						var agentOnlyInReferee = JSON
+								.parse(agentsOnlyInReferee[d]);
+						for (var e = 0; e < activities.length; e++) {
+							emit([ referrerAuths[a], level, agentOnlyInReferee,
+									activities[e], verbs[b], registrations[c],
+									referrerStored ], referrerId);
 
 						}
-						doRefEmit(refAuths[a], level, agentsNotInRef[d], null,
-								allVerbs[b], allRegistrations[c], refStored,
-								refdoc);
+						emit([ referrerAuths[a], level, agentOnlyInReferee,
+								null, verbs[b], registrations[c],
+								referrerStored ], referrerId);
 					}
-					// [agentsMinusNotInRef, activitiesNotInRef]
-					for (var d = 0; d < activitiesNotInRef.length; d++) {
-						for (var e = 0; e < allAgentsMinusNotInRef.length; e++) {
-							doRefEmit(refAuths[a], level,
-									allAgentsMinusNotInRef[e],
-									activitiesNotInRef[d], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
+					for (var d = 0; d < activitiesOnlyInReferee.length; d++) {
+						for (var e = 0; e < agentsMinusOnlyInReferee.length; e++) {
+							var agentOb = JSON
+									.parse(agentsMinusOnlyInReferee[e]);
+							emit([ referrerAuths[a], level, agentOb,
+									activitiesOnlyInReferee[d], verbs[b],
+									registrations[c], referrerStored ],
+									referrerId);
 						}
-						doRefEmit(refAuths[a], level, null,
-								activitiesNotInRef[d], allVerbs[b],
-								allRegistrations[c], refStored, refdoc);
-
-					}
-					var level = 2; // agent_related
-
-					// [relatedAgentsNotInRef, allActivities]
-					for (var d = 0; d < relatedAgentsNotInRef.length; d++) {
-						for (var e = 0; e < allActivities.length; e++) {
-							doRefEmit(refAuths[a], level,
-									relatedAgentsNotInRef[d], allActivities[e],
-									allVerbs[b], allRegistrations[c],
-									refStored, refdoc);
-
-						}
-						doRefEmit(refAuths[a], level, relatedAgentsNotInRef[d],
-								null, allVerbs[b], allRegistrations[c],
-								refStored, refdoc);
-					}
-					// [relatedAgentsMinusNotInRef, activitiesNotInRef]
-					for (var d = 0; d < activitiesNotInRef.length; d++) {
-						for (var e = 0; e < allRelatedAgentsMinusNotInRef.length; e++) {
-							doRefEmit(refAuths[a], level,
-									allRelatedAgentsMinusNotInRef[e],
-									activitiesNotInRef[d], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
-						}
-						doRefEmit(refAuths[a], level, null,
-								activitiesNotInRef[d], allVerbs[b],
-								allRegistrations[c], refStored, refdoc);
-
-					}
-					var level = 3; // activity_related
-
-					// [agentsNotInRef, allRelatedActivities]
-					for (var d = 0; d < agentsNotInRef.length; d++) {
-						for (var e = 0; e < allRelatedActivities.length; e++) {
-							doRefEmit(refAuths[a], level, agentsNotInRef[d],
-									allRelatedActivities[e], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
-
-						}
-						doRefEmit(refAuths[a], level, agentsNotInRef[d], null,
-								allVerbs[b], allRegistrations[c], refStored,
-								refdoc);
-					}
-					// [agentsMinusNotInRef, relatedActivitiesNotInRef]
-					for (var d = 0; d < relatedActivitesNotInRef.length; d++) {
-						for (var e = 0; e < allAgentsMinusNotInRef.length; e++) {
-							doRefEmit(refAuths[a], level,
-									allAgentsMinusNotInRef[e],
-									relatedActivitesNotInRef[d], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
-						}
-						doRefEmit(refAuths[a], level, null,
-								relatedActivitesNotInRef[d], allVerbs[b],
-								allRegistrations[c], refStored, refdoc);
-
-					}
-					var level = 4; // agent_related & activity_related
-
-					// [relatedAgentsNotInRef, allRelatedActivities]
-					for (var d = 0; d < relatedAgentsNotInRef.length; d++) {
-						for (var e = 0; e < allRelatedActivities.length; e++) {
-							doRefEmit(refAuths[a], level,
-									relatedAgentsNotInRef[d],
-									allRelatedActivities[e], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
-
-						}
-						doRefEmit(refAuths[a], level, relatedAgentsNotInRef[d],
-								null, allVerbs[b], allRegistrations[c],
-								refStored, refdoc);
-					}
-					// [relatedAgentsMinusNotInRef,
-					// relatedActivitiesNotInRef]
-					for (var d = 0; d < relatedActivitesNotInRef.length; d++) {
-						for (var e = 0; e < allRelatedAgentsMinusNotInRef.length; e++) {
-							doRefEmit(refAuths[a], level,
-									allRelatedAgentsMinusNotInRef[e],
-									relatedActivitesNotInRef[d], allVerbs[b],
-									allRegistrations[c], refStored, refdoc);
-						}
-						doRefEmit(refAuths[a], level, null,
-								relatedActivitesNotInRef[d], allVerbs[b],
-								allRegistrations[c], refStored, refdoc);
+						emit([ referrerAuths[a], level, null,
+								activitiesOnlyInReferee[d], verbs[b],
+								registrations[c], referrerStored ], referrerId);
 
 					}
 				}
 			}
 		}
-
 	}
+
+	// parentChain sets do not explicitly contain root sets
+	function emitReferrers(doc, rootAgents, rootActivities, parentChainAgents,
+			parentChainActivities, allVerbs, allRegistrations) {
+
+		if (!doc.referrers) {
+			return;
+		}
+		for (var i = 0; i < doc.referrers.length; i++) {
+			var ref = doc.referrers[i];
+
+			var refAgents = getAgents(ref, false);
+			var refRelatedAgents = getAgents(ref, true);
+			var refActivities = getActivities(ref, false);
+			var refRelatedActivities = getActivities(ref, true);
+			var refRegistration = ref.context ? ref.context.registration : null;
+
+			var refAuth = ref.authority;
+			var refVerb = ref.verb.id;
+			var refStored = ref.stored;
+
+			allVerbs = sum(allVerbs, [ refVerb ]);
+			if (refRegistration) {
+				allRegistrations = sum(allRegistrations, refRegistration);
+			}
+
+			parentChainAgents = sum(parentChainAgents, refAgents);
+
+			var agentsOnlyInRoot = diff(rootAgents, parentChainAgents);
+
+			var allAgents = sum(parentChainAgents, rootAgents);
+
+			var agentsMinusOnlyInRoot = diff(allAgents, agentsOnlyInRoot);
+
+			parentChainActivities = sum(parentChainActivities, refActivities);
+
+			var allActivities = sum(parentChainActivities, rootActivities);
+
+			var activitiesOnlyInRoot = diff(rootActivities,
+					parentChainActivities);
+
+			var refAuths = [ refAuth, 'ALL' ];
+
+			var level = 1; // none related
+
+			doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+					agentsOnlyInRoot, agentsMinusOnlyInRoot, allActivities,
+					activitiesOnlyInRoot, ref.stored, ref.id);
+
+			// var level = 2; // agent_related
+			//
+			// doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+			// relatedAgentsNotInRef, allRelatedAgentsMinusNotInRef,
+			// allActivities, activitiesNotInRef, ref.stored, ref.id);
+			//
+			// var level = 3; // activity_related
+			//
+			// doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+			// agentsNotInRef, allAgentsMinusNotInRef,
+			// allRelatedActivities, relatedActivitesNotInRef, ref.stored,
+			// ref.id);
+			//
+			// var level = 4; // agent_related & activity_related
+			//
+			// doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+			// relatedAgentsNotInRef, allRelatedAgentsMinusNotInRef,
+			// allRelatedActivities, relatedActivitesNotInRef, ref.stored,
+			// ref.id);
+			emitReferrers(ref, rootAgents, rootActivities, parentChainAgents,
+					parentChainActivities, allVerbs, allRegistrations);
+		}
+	}
+	emitReferrers(doc, agents, activities, [], [], [ verb, null ],
+			(registration ? [ registration, null ] : [ null ]));
 };
 
 var allRows = [];
@@ -546,27 +494,48 @@ if (dupes.length > 0 || allRows.length != expected) {
 }
 
 doc4 = {
-	"_id" : "03226b5d-d03e-421d-aeed-20e5be5147d8",
-	"_rev" : "2-55e19138393f3881ae744517072d6168",
-	"id" : "03226b5d-d03e-421d-aeed-20e5be5147d8",
+	"_id" : "6ec8a804-33dd-4d94-b6bf-54e35b5b668b",
+	"_rev" : "3-47aa44c7c808ab0ef9cc9503a18841e5",
+	"id" : "6ec8a804-33dd-4d94-b6bf-54e35b5b668b",
 	"actor" : {
 		"objectType" : "Agent",
-		"mbox" : "mailto:andrew@uva.nl"
+		"mbox" : "mailto:ben@uva.nl"
 	},
 	"verb" : {
-		"id" : "confirms"
+		"id" : "passed"
 	},
 	"object" : {
-		"objectType" : "StatementRef",
-		"id" : "6ec8a804-33dd-4d94-b6bf-54e35b5b668b"
+		"objectType" : "Activity",
+		"id" : "explosivestraining"
 	},
-	"stored" : "2014-10-01T16:21:32.237Z",
+	"context" : {
+		"registration" : "59039ad7-e8ed-4dd2-8a07-52f015fa1e08"
+	},
+	"stored" : "2014-10-01T16:21:32.210Z",
 	"authority" : {
 		"objectType" : "Agent",
 		"mbox" : "test@example.com"
 	},
 	"type" : "PLAIN",
 	"referrers" : [ {
+		"id" : "03226b5d-d03e-421d-aeed-20e5be5147d8",
+		"actor" : {
+			"objectType" : "Agent",
+			"mbox" : "mailto:andrew@uva.nl"
+		},
+		"verb" : {
+			"id" : "confirms"
+		},
+		"object" : {
+			"objectType" : "StatementRef",
+			"id" : "6ec8a804-33dd-4d94-b6bf-54e35b5b668b"
+		},
+		"stored" : "2014-10-01T16:21:32.237Z",
+		"authority" : {
+			"objectType" : "Agent",
+			"mbox" : "test@example.com"
+		}
+	}, {
 		"id" : "db71c502-56a3-4701-a020-37bed42cdef0",
 		"actor" : {
 			"objectType" : "Agent",

@@ -455,6 +455,7 @@ public class ITCouchDBStatementRepository {
 		filter.setVerb(new IRI("confirms"));
 
 		result = repository.getStatements(filter);
+		statements= result.getStatements();
 		assertEquals(2, statements.size());
 		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
 				Arrays.asList(statements.get(0).getId(), statements.get(1)

@@ -143,12 +143,13 @@ public class CouchDbStatementRepository implements StatementRepository {
 		}
 		List<StatementDocument> refChain = new ArrayList<StatementDocument>();
 
-		String result = storeStatementAndReturnDoc(referringStatement).getId();
+		StatementDocument referringDoc= storeStatementAndReturnDoc(referringStatement); 
+		String result = referringDoc.getId();
 
 
 		// add Referrer info to all statements in the reference-chain
 		while (referredDoc != null) {
-			referredDoc.getReferrers().add(referringStatement);
+			referredDoc.getReferrers().add(referringDoc);
 			refChain.add(referredDoc);
 			Statement referredStatement = referredDoc.getStatement();
 			if (isReferringStatement(referredStatement)) {
