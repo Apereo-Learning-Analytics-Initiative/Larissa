@@ -432,8 +432,7 @@ public class ITCouchDBStatementRepository {
 
 		filter.setRegistration(statZ.getContext().getRegistration());
 
-		result = repository.getStatements(filter);
-		statements = result.getStatements();
+		statements = getStatements(filter);
 		assertEquals(3, statements.size());
 		assertEquals(
 				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
@@ -444,8 +443,7 @@ public class ITCouchDBStatementRepository {
 
 		filter.setActivity(new IRI("explosivestraining"));
 
-		result = repository.getStatements(filter);
-		statements = result.getStatements();
+		statements = getStatements(filter);
 		assertEquals(3, statements.size());
 		assertEquals(
 				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
@@ -454,12 +452,56 @@ public class ITCouchDBStatementRepository {
 
 		filter.setVerb(new IRI("confirms"));
 
-		result = repository.getStatements(filter);
-		statements= result.getStatements();
+		statements = getStatements(filter);
 		assertEquals(2, statements.size());
 		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
 				Arrays.asList(statements.get(0).getId(), statements.get(1)
 						.getId()));
+
+		filter.setVerb(new IRI("mentioned"));
+		statements = getStatements(filter);
+		assertEquals(1, statements.size());
+		assertEquals(Arrays.asList(statX.getId()),
+				Arrays.asList(statements.get(0).getId()));
+
+		filter.setAgent(createAgent("ben@uva.nl"));
+		statements = getStatements(filter);
+		assertEquals(1, statements.size());
+		assertEquals(Arrays.asList(statX.getId()),
+				Arrays.asList(statements.get(0).getId()));
+
+		filter.setAgent(null);
+		filter.setActivity(null);
+		filter.setRegistration(statZ.getContext().getRegistration());
+		// verb is still 'mentioned'
+		statements = getStatements(filter);
+		assertEquals(1, statements.size());
+		assertEquals(Arrays.asList(statX.getId()),
+				Arrays.asList(statements.get(0).getId()));
+
+		filter.setVerb(null);
+		statements = getStatements(filter);
+		assertEquals(3, statements.size());
+		assertEquals(
+				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId(), statements.get(2).getId()));
+
+		filter.setVerb(new IRI("confirms"));
+		statements = getStatements(filter);
+		assertEquals(2, statements.size());
+		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId()));
+
+	}
+
+	private List<Statement> getStatements(StatementFilter filter) {
+		StatementResult result;
+		List<Statement> statements;
+		result = repository.getStatements(filter);
+		statements = result.getStatements();
+		return statements;
 	}
 
 	Agent createAgent(String emailAddress) {

@@ -1,13 +1,37 @@
 // [authority, relation, agent, activity, verb, registration]
 // relation: 1= none related, 2= agent_related, 3= activity_related, 4= both related
 
-// use javascriptcompressor.com before pasting in design doc
-// don't use double quotes for strings due to the code being inserted in a JSON value.
+// before putting in statement_design.json:
+// apply javascriptcompressor.com
+// NB don't use double quotes for strings due to the code being inserted in a JSON value.
 
 var map = function(doc) {
 
 	if (doc.type === 'VOIDED') {
 		return;
+	}
+
+	// var sum = require('views/lib/sets').sum;
+	// var diff = require('views/lib/sets').diff;
+
+	function diff(arrA, arrB) {
+		var result = [];
+		for (var i = 0; i < arrA.length; i++) {
+			if (arrB.indexOf(arrA[i]) < 0) {
+				result.push(arrA[i]);
+			}
+		}
+		return result;
+	}
+
+	function sum(arrA, arrB) {
+		var result = arrA.slice();
+		for (var i = 0; i < arrB.length; i++) {
+			if (result.indexOf(arrB[i]) < 0) {
+				result.push(arrB[i]);
+			}
+		}
+		return result;
 	}
 
 	function addIfNotExists(string, array) {
@@ -168,34 +192,6 @@ var map = function(doc) {
 		doEmit(4, null, related_activities[i]);
 	}
 
-	function diff(arrA, arrB) {
-		var result = [];
-		for (var i = 0; i < arrA.length; i++) {
-			if (arrB.indexOf(arrA[i]) < 0) {
-				result.push(arrA[i]);
-			}
-		}
-		return result;
-	}
-	function sum(arrA, arrB) {
-		var result = arrA.slice();
-		for (var i = 0; i < arrB.length; i++) {
-			if (result.indexOf(arrB[i]) < 0) {
-				result.push(arrB[i]);
-			}
-		}
-		return result;
-	}
-
-	function doRefEmit(auth, level, agent, activity, verb, registration,
-			stored, docid) {
-		if (agent) {
-			agent = JSON.parse(agent);
-		}
-		emit([ auth, level, agent, activity, verb, registration, stored ],
-				docid);
-	}
-
 	function doRefEmitForLevel(referrerAuths, level, verbs, registrations,
 			agentsOnlyInReferee, agentsMinusOnlyInReferee, activities,
 			activitiesOnlyInReferee, referrerStored, referrerId) {
@@ -259,7 +255,7 @@ var map = function(doc) {
 
 			allVerbs = sum(allVerbs, [ refVerb ]);
 			if (refRegistration) {
-				allRegistrations = sum(allRegistrations, refRegistration);
+				allRegistrations = sum(allRegistrations, [ refRegistration ]);
 			}
 
 			parentChainAgents = sum(parentChainAgents, refAgents);
@@ -465,7 +461,8 @@ allRows = [];
 
 map(doc3);
 
-expected = 368;
+// for now... (not doing related yet)
+expected = 116;
 
 function reportDupes(sortedArray) {
 	var results = [];
@@ -557,5 +554,21 @@ doc4 = {
 };
 allRows = [];
 map(doc4);
-allRows.sort();
-console.log(allRows);
+
+// for now... not doing related yet
+expected = 256;
+dupes = reportDupes(allRows);
+
+if (dupes.length > 0 || allRows.length != expected) {
+	if (dupes.length > 0) {
+		console.log("test four failed; dupes emited:");
+		console.log(dupes);
+	} else {
+		console.log("test four failed; expected " + expected + " rows but was "
+				+ allRows.length);
+		allRows.sort();
+		console.log(allRows);
+	}
+} else {
+	console.log("test four was succesful");
+}

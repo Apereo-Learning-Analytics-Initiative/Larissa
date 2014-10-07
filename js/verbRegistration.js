@@ -1,12 +1,35 @@
 // [authority, verb, registration, stored]
 
-// use javascriptcompressor.com before pasting in design doc
-// don't use double quotes for strings due to the code being inserted in a JSON value.
+// before putting in statement_design.json:
+// apply javascriptcompressor.com
+// NB don't use double quotes for strings due to the code being inserted in a JSON value.
 
 var map = function(doc) {
-
 	if (doc.type === 'VOIDED') {
 		return;
+	}
+
+	// var diff = require('views/lib/sets').diff;
+	// var sum = require('views/lib/sets').sum;
+
+	function diff(arrA, arrB) {
+		var result = [];
+		for (var i = 0; i < arrA.length; i++) {
+			if (arrB.indexOf(arrA[i]) < 0) {
+				result.push(arrA[i]);
+			}
+		}
+		return result;
+	}
+
+	function sum(arrA, arrB) {
+		var result = arrA.slice();
+		for (var i = 0; i < arrB.length; i++) {
+			if (result.indexOf(arrB[i]) < 0) {
+				result.push(arrB[i]);
+			}
+		}
+		return result;
 	}
 
 	var auth = doc.authority;
@@ -14,47 +37,68 @@ var map = function(doc) {
 	var registration = doc.context ? doc.context.registration : null;
 	var stored = doc.stored;
 
-	emit([ auth, null, null, stored ]);
-	emit([ 'ALL', null, null, stored ]);
-	emit([ auth, verb, null, stored ]);
-	emit([ 'ALL', verb, null, stored ]);
-	if (registration) {
-		emit([ auth, null, registration, stored ]);
-		emit([ 'ALL', null, registration, stored ]);
-		emit([ auth, verb, registration, stored ]);
-		emit([ 'ALL', verb, registration, stored ]);
+	var auths = [ 'ALL', auth ];
+
+	for (var i = 0; i < auths.length; i++) {
+		emit([ auths[i], null, null, stored ]);
+		emit([ auths[i], verb, null, stored ]);
+		if (registration) {
+			emit([ auths[i], null, registration, stored ]);
+			emit([ auths[i], verb, registration, stored ]);
+		}
 	}
 
-	for (i in doc.referrers) {
-		var ref = doc.referrers[i];
-		var refdoc = {
-			_id : ref.id
-		};
-		var refAuth = ref.authority;
-		var refVerb = ref.verb.id;
-		var refRegistration = ref.context ? ref.context.registration : null;
-		var refStored = ref.stored;
+	function emitReferrers(doc, rootVerb, rootRegistration, parentChainVerbs,
+			parentChainRegistrations) {
+		if (!doc.referrers) {
+			return;
+		}
+		for (var i = 0; i < doc.referrers.length; i++) {
+			var ref = doc.referrers[i];
+			var refAuths = [ 'ALL', ref.authority ];
+			var refVerb = ref.verb.id;
+			var refRegistration = ref.context ? ref.context.registration : null;
+			var refStored = ref.stored;
 
-		if (refVerb !== verb) {
-			emit([ refAuth, verb, null, refStored ], refdoc);
-			emit([ 'ALL', verb, null, refStored ], refdoc);
+			var referrerId = {
+				_id : ref.id
+			};
+
+			parentChainVerbs = sum(parentChainVerbs, [ refVerb ]);
 			if (refRegistration) {
-				emit([ refAuth, verb, refRegistration, refStored ], refdoc);
-				emit([ 'ALL', verb, refRegistration, refStored ], refdoc);
+				parentChainRegistrations = sum(parentChainRegistrations,
+						[ refRegistration ]);
 			}
-		}
-		if (registration && refRegistration !== registration) {
-			emit([ refAuth, null, registration, refStored ], refdoc);
-			emit([ 'ALL', null, registration, refStored ], refdoc);
-			emit([ refAuth, refVerb, registration, refStored ], refdoc);
-			emit([ 'ALL', refVerb, registration, refStored ], refdoc);
-			if (refVerb !== verb) {
-				emit([ refAuth, verb, registration, refStored ], refdoc);
-				emit([ 'ALL', verb, registration, refStored ], refdoc);
+
+			var ittRegistrations = rootRegistration ? sum(
+					parentChainRegistrations, [ rootRegistration ])
+					: parentChainRegistrations;
+			if (refVerb !== rootVerb) {
+				for (var j = 0; j < refAuths.length; j++) {
+					for (var k = 0; k < ittRegistrations.length; k++) {
+						emit([ refAuths[j], rootVerb, ittRegistrations[k],
+								refStored ], referrerId);
+					}
+					emit([ refAuths[j], rootVerb, null, refStored ], referrerId);
+				}
 			}
+			var ittVerbs = diff(parentChainVerbs, [ rootVerb ]);
+			if (rootRegistration && refRegistration !== rootRegistration) {
+				for (var j = 0; j < refAuths.length; j++) {
+					for (var k = 0; k < ittVerbs.length; k++) {
+						emit([ refAuths[j], ittVerbs[k], rootRegistration,
+								refStored ], referrerId)
+					}
+					emit([ refAuths[j], null, rootRegistration, refStored ],
+							referrerId);
+				}
+			}
+			emitReferrers(ref, rootVerb, rootRegistration, parentChainVerbs,
+					parentChainRegistrations);
 		}
 
 	}
+	emitReferrers(doc, verb, registration, [], []);
 };
 
 var allRows = [];
@@ -94,6 +138,17 @@ if (expected !== allRows.length) {
 }
 var doc2 = {
 	"referrers" : [ {
+		"referrers" : [ {
+			"id" : "X",
+			"authority" : {
+				"objectType" : "Agent",
+				"mbox" : "X@example.com"
+			},
+			"verb" : {
+				"id" : "Zverb"
+			},
+			"stored" : "2012-04-23T15:23:19.154Z"
+		} ],
 		"id" : "Y",
 		"authority" : {
 			"objectType" : "Agent",
@@ -106,16 +161,6 @@ var doc2 = {
 			"registration" : "Yreg"
 		},
 		"stored" : "2013-04-23T15:23:19.154Z"
-	}, {
-		"id" : "X",
-		"authority" : {
-			"objectType" : "Agent",
-			"mbox" : "X@example.com"
-		},
-		"verb" : {
-			"id" : "Zverb"
-		},
-		"stored" : "2012-04-23T15:23:19.154Z"
 	} ],
 	"type" : "PLAIN",
 	"id" : "Z",
