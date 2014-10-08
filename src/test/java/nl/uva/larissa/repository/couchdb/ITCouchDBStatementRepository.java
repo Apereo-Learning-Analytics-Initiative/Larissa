@@ -496,6 +496,68 @@ public class ITCouchDBStatementRepository {
 
 	}
 
+	@Test
+	public void testGetReferringWithRelated() throws Exception {
+		Statement statZ = StatementBuilder.statement().randomId()
+				.actor("ben@uva.nl").verb("kicked")
+				.activity("explosivestraining").instructor("bomberman@uva.nl")
+				.build();
+
+		Statement statY = StatementBuilder.statement().randomId()
+				.actor("andrew@uva.nl").verb("confirms")
+				.statementRef(statZ.getId()).parentContextActivity("dining")
+				.build();
+
+		Statement statX = StatementBuilder.statement().randomId()
+				.actor("tom@uva.nl").verb("mentioned")
+				.statementRef(statY.getId()).build();
+
+		repository.storeStatement(statZ);
+		repository.storeStatement(statY);
+		repository.storeStatement(statX);
+
+		StatementFilter filter = new StatementFilter();
+		filter.setAgent(createAgent("bomberman@uva.nl"));
+		List<Statement> statements = getStatements(filter);
+
+		assertEquals(0, statements.size());
+
+		filter.setRelatedAgents(true);
+		statements = getStatements(filter);
+
+		assertEquals(3, statements.size());
+		assertEquals(
+				Arrays.asList(statX.getId(), statY.getId(), statZ.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId(), statements.get(2).getId()));
+
+		filter.setActivity(new IRI("dining"));
+		statements = getStatements(filter);
+
+		assertEquals(0, statements.size());
+
+		filter.setRelatedActivities(true);
+		statements = getStatements(filter);
+
+		assertEquals(2, statements.size());
+		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId()));
+
+		filter.setRelatedAgents(false);
+		statements = getStatements(filter);
+
+		assertEquals(0, statements.size());
+
+		filter.setAgent(null);
+		statements = getStatements(filter);
+
+		assertEquals(2, statements.size());
+		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
+				Arrays.asList(statements.get(0).getId(), statements.get(1)
+						.getId()));
+	}
+
 	private List<Statement> getStatements(StatementFilter filter) {
 		StatementResult result;
 		List<Statement> statements;

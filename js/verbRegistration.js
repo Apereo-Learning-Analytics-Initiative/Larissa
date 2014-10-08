@@ -9,9 +9,6 @@ var map = function(doc) {
 		return;
 	}
 
-	// var diff = require('views/lib/sets').diff;
-	// var sum = require('views/lib/sets').sum;
-
 	function diff(arrA, arrB) {
 		var result = [];
 		for (var i = 0; i < arrA.length; i++) {

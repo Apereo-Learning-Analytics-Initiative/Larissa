@@ -11,9 +11,6 @@ var map = function(doc) {
 		return;
 	}
 
-	// var sum = require('views/lib/sets').sum;
-	// var diff = require('views/lib/sets').diff;
-
 	function diff(arrA, arrB) {
 		var result = [];
 		for (var i = 0; i < arrA.length; i++) {
@@ -234,8 +231,10 @@ var map = function(doc) {
 	}
 
 	// parentChain sets do not explicitly contain root sets
-	function emitReferrers(doc, rootAgents, rootActivities, parentChainAgents,
-			parentChainActivities, allVerbs, allRegistrations) {
+	function emitReferrers(doc, rootAgents, rootActivities, relatedRootAgents,
+			relatedRootActivities, parentChainAgents, parentChainActivities,
+			relatedParentChainAgents, relatedParentChainActivities, allVerbs,
+			allRegistrations) {
 
 		if (!doc.referrers) {
 			return;
@@ -254,24 +253,42 @@ var map = function(doc) {
 			var refStored = ref.stored;
 
 			allVerbs = sum(allVerbs, [ refVerb ]);
+
 			if (refRegistration) {
 				allRegistrations = sum(allRegistrations, [ refRegistration ]);
 			}
 
 			parentChainAgents = sum(parentChainAgents, refAgents);
 
+			relatedParentChainAgents = sum(relatedParentChainAgents,
+					refRelatedAgents);
+
 			var agentsOnlyInRoot = diff(rootAgents, parentChainAgents);
 
-			var allAgents = sum(parentChainAgents, rootAgents);
+			var agentsMinusOnlyInRoot = diff(parentChainAgents,
+					agentsOnlyInRoot);
 
-			var agentsMinusOnlyInRoot = diff(allAgents, agentsOnlyInRoot);
+			var relatedAgentsOnlyInRoot = diff(relatedRootAgents,
+					relatedParentChainAgents);
+
+			var relatedAgentsMinusOnlyInRoot = diff(relatedParentChainAgents,
+					relatedAgentsOnlyInRoot);
 
 			parentChainActivities = sum(parentChainActivities, refActivities);
+
+			relatedParentChainActivities = sum(relatedParentChainActivities,
+					refRelatedActivities);
 
 			var allActivities = sum(parentChainActivities, rootActivities);
 
 			var activitiesOnlyInRoot = diff(rootActivities,
 					parentChainActivities);
+
+			var allRelatedActivities = sum(relatedParentChainActivities,
+					relatedRootActivities);
+
+			var relatedActivitiesOnlyInRoot = diff(relatedRootActivities,
+					relatedParentChainActivities);
 
 			var refAuths = [ refAuth, 'ALL' ];
 
@@ -281,31 +298,37 @@ var map = function(doc) {
 					agentsOnlyInRoot, agentsMinusOnlyInRoot, allActivities,
 					activitiesOnlyInRoot, ref.stored, ref.id);
 
-			// var level = 2; // agent_related
-			//
-			// doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
-			// relatedAgentsNotInRef, allRelatedAgentsMinusNotInRef,
-			// allActivities, activitiesNotInRef, ref.stored, ref.id);
-			//
-			// var level = 3; // activity_related
-			//
-			// doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
-			// agentsNotInRef, allAgentsMinusNotInRef,
-			// allRelatedActivities, relatedActivitesNotInRef, ref.stored,
-			// ref.id);
-			//
-			// var level = 4; // agent_related & activity_related
-			//
-			// doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
-			// relatedAgentsNotInRef, allRelatedAgentsMinusNotInRef,
-			// allRelatedActivities, relatedActivitesNotInRef, ref.stored,
-			// ref.id);
-			emitReferrers(ref, rootAgents, rootActivities, parentChainAgents,
-					parentChainActivities, allVerbs, allRegistrations);
+			level = 2; // agent_related
+
+			doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+					relatedAgentsOnlyInRoot, relatedAgentsMinusOnlyInRoot,
+					allActivities, activitiesOnlyInRoot, ref.stored, ref.id);
+
+			level = 3; // activity_related
+
+			doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+					agentsOnlyInRoot, agentsMinusOnlyInRoot,
+					allRelatedActivities, relatedActivitiesOnlyInRoot,
+					ref.stored, ref.id);
+
+			level = 4; // agent_related & activity_related
+
+			doRefEmitForLevel(refAuths, level, allVerbs, allRegistrations,
+					relatedAgentsOnlyInRoot, relatedAgentsMinusOnlyInRoot,
+					allRelatedActivities, relatedActivitiesOnlyInRoot,
+					ref.stored, ref.id);
+
+			// --
+
+			emitReferrers(ref, rootAgents, rootActivities, relatedRootAgents,
+					relatedRootActivities, parentChainAgents,
+					parentChainActivities, relatedParentChainAgents,
+					relatedParentChainActivities, allVerbs, allRegistrations);
 		}
 	}
-	emitReferrers(doc, agents, activities, [], [], [ verb, null ],
-			(registration ? [ registration, null ] : [ null ]));
+	emitReferrers(doc, agents, activities, related_agents, related_activities,
+			[], [], [], [], [ verb, null ], (registration ? [ registration,
+					null ] : [ null ]));
 };
 
 var allRows = [];
@@ -461,8 +484,7 @@ allRows = [];
 
 map(doc3);
 
-// for now... (not doing related yet)
-expected = 116;
+expected = 416;
 
 function reportDupes(sortedArray) {
 	var results = [];
@@ -506,7 +528,11 @@ doc4 = {
 		"id" : "explosivestraining"
 	},
 	"context" : {
-		"registration" : "59039ad7-e8ed-4dd2-8a07-52f015fa1e08"
+		"registration" : "59039ad7-e8ed-4dd2-8a07-52f015fa1e08",
+		"instructor" : {
+			"objectType" : "Agent",
+			"mbox" : "mailto:bomberman@uva.nl"
+		}
 	},
 	"stored" : "2014-10-01T16:21:32.210Z",
 	"authority" : {
@@ -526,6 +552,14 @@ doc4 = {
 		"object" : {
 			"objectType" : "StatementRef",
 			"id" : "6ec8a804-33dd-4d94-b6bf-54e35b5b668b"
+		},
+		"context" : {
+			"contextActivities" : {
+				"parent" : [ {
+					"objectType" : "Activity",
+					"id" : "dining"
+				} ]
+			}
 		},
 		"stored" : "2014-10-01T16:21:32.237Z",
 		"authority" : {
@@ -555,8 +589,7 @@ doc4 = {
 allRows = [];
 map(doc4);
 
-// for now... not doing related yet
-expected = 256;
+expected = 924;
 dupes = reportDupes(allRows);
 
 if (dupes.length > 0 || allRows.length != expected) {

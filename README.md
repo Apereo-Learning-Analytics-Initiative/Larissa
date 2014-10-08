@@ -56,7 +56,7 @@ This probably makes it a bad idea to connect to a non-localhost instance!
  
 ### Statement API
 * no support for attachments
-* a filtered query using parameter _agent_ or _activity_ will not return referring statements (_StatementRef_)
+* a StatementRef in a SubStatement will currently not respect <a href="https://github.com/adlnet/xAPI-Spec/blob/master/xAPI.md#filter-conditions-for-statementrefs">Filter Conditions for StatementRefs</a> when querying.
 * _agent_ query-parameter only accept Agents, not Groups
 * _format=ids_ queries only work when using filter-parameters (e.g. not _statementId_)
 * _format=canonical_ queries do not work

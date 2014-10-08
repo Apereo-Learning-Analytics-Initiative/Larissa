@@ -1,5 +1,7 @@
 package nl.uva.larissa.json.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,6 +29,10 @@ public class StatementBuilder {
 	private String activityId;
 	private String registration;
 
+	private String instructor;
+
+	private List<String> parentContextActivities = new ArrayList<>(0);
+
 	private StatementBuilder() {
 	}
 
@@ -52,11 +58,7 @@ public class StatementBuilder {
 
 	public Statement build() {
 		Statement result = new Statement();
-		Agent authority = new Agent();
-		IFI authIfi = new IFI();
-		authIfi.setMbox(new IRI("test@example.com"));
-		authority.setIdentifier(authIfi);
-		result.setAuthority(authority);
+		result.setAuthority(createAgentWithEmail("test@example.com"));
 		result.setId(id);
 
 		Verb verb = new Verb();
@@ -64,13 +66,7 @@ public class StatementBuilder {
 
 		result.setVerb(verb);
 
-		Agent agent = new Agent();
-
-		IFI identifier = new IFI();
-		identifier.setMbox(new IRI("mailto:" + email));
-		agent.setIdentifier(identifier);
-
-		result.setActor(agent);
+		result.setActor(createAgentWithEmail(email));
 
 		if (referenceId != null) {
 			StatementRef ref = new StatementRef();
@@ -78,24 +74,58 @@ public class StatementBuilder {
 
 			result.setStatementObject(ref);
 		} else if (activityId != null) {
-			Activity activity = new Activity();
-			activity.setId(new IRI(activityId));
-
-			result.setStatementObject(activity);
+			result.setStatementObject(createActivityWithId(activityId));
 
 		}
+		Context context = null;
 		if (registration != null) {
-			Context context = new Context();
+			context = new Context();
 			context.setRegistration(registration);
+		}
+		if (instructor != null) {
+			if (context == null) {
+				context = new Context();
+			}
+			context.setInstructor(createAgentWithEmail(instructor));
 
+		}
+		if (!parentContextActivities.isEmpty()) {
+			if (context == null) {
+				context = new Context();
+			}
+			ContextActivities contextActivities = new ContextActivities();
+			ArrayList<Activity> activities = new ArrayList<>(
+					parentContextActivities.size());
+			for (String activityId : parentContextActivities) {
+				activities.add(createActivityWithId(activityId));
+			}
+			contextActivities.setParent(activities);
+			context.setContextActivities(contextActivities);
+		}
+		if (context != null) {
 			result.setContext(context);
 		}
+
 		Set<ConstraintViolation<Statement>> violations = validator
 				.validate(result);
 		if (!violations.isEmpty()) {
 			throw new ValidationException(violations.iterator().next()
 					.getMessage());
 		}
+		return result;
+	}
+
+	private Activity createActivityWithId(String id) {
+		Activity result = new Activity();
+		result.setId(new IRI(id));
+		return result;
+	}
+
+	private Agent createAgentWithEmail(String email) {
+		Agent result = new Agent();
+		IFI ifi = new IFI();
+		ifi.setMbox(new IRI("mailto:" + email));
+		result.setIdentifier(ifi);
 		return result;
 	}
 
@@ -111,6 +141,16 @@ public class StatementBuilder {
 
 	public StatementBuilder contextWithRegistration(String registration) {
 		this.registration = registration;
+		return this;
+	}
+
+	public StatementBuilder instructor(String string) {
+		this.instructor = string;
+		return this;
+	}
+
+	public StatementBuilder parentContextActivity(String string) {
+		parentContextActivities.add(string);
 		return this;
 	}
 }
