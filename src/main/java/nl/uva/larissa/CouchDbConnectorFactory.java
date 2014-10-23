@@ -44,11 +44,11 @@ public class CouchDbConnectorFactory {
 		return mapper;
 	}
 
-	public CouchDbConnector createConnector(String couchUrl, String dbName) {
+	public CouchDbConnector createConnector(String couchUrl, String dbName, int maxConnections) {
 		HttpClient httpClient;
 
 		try {
-			httpClient = new StdHttpClient.Builder().url(couchUrl).build();
+			httpClient = new StdHttpClient.Builder().url(couchUrl).maxConnections(maxConnections).build();
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}

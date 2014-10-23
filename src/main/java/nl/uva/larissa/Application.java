@@ -35,8 +35,9 @@ public class Application extends ResourceConfig {
 
 		ConfigReader config = new ConfigReader(context);
 		final CouchDbConnector connector = new CouchDbConnectorFactory()
-				.createConnector(config.get(Key.COUCHDB_URL),
-						config.get(Key.COUCHDB_DB_NAME));
+				.createConnector(config.get(Key.COUCHDB_URL), config
+						.get(Key.COUCHDB_DB_NAME), Integer.parseInt(config
+						.get(Key.COUCHDB_MAX_CONNECTIONS)));
 
 		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 		final Validator validator = factory.getValidator();

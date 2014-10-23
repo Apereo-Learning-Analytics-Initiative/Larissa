@@ -11,7 +11,8 @@ public class ConfigReader {
 	private static final String LRS_CONFIG = "lrs.config";
 
 	enum Key {
-		COUCHDB_URL("couchdb.url"), COUCHDB_DB_NAME("couchdb.db.name");
+		COUCHDB_URL("couchdb.url"), COUCHDB_DB_NAME("couchdb.db.name"), COUCHDB_MAX_CONNECTIONS(
+				"couchdb.connections.max");
 		private String key;
 
 		Key(String key) {
