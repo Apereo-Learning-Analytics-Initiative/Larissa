@@ -41,9 +41,8 @@ public class ITAgentQuery {
 		httpClient = new StdHttpClient.Builder().url(SERVER_URL).build();
 
 		repository = new CouchDbStatementRepository(
-				new CouchDbConnectorFactory()
-						.createConnector(SERVER_URL, DB_ID),
-				new QueryResolver());
+				new CouchDbConnectorFactory().createConnector(SERVER_URL,
+						DB_ID, 20), new QueryResolver());
 	}
 
 	@AfterClass
