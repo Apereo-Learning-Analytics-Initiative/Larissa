@@ -107,7 +107,7 @@ public class CouchDbStatementRepository implements StatementRepository {
 		indexingExecSvc = Executors.newSingleThreadExecutor();
 
 		create();
-		doIndex();
+		scheduleIndex();
 	}
 
 	@Override
@@ -143,9 +143,8 @@ public class CouchDbStatementRepository implements StatementRepository {
 		}
 		List<StatementDocument> refChain = new ArrayList<StatementDocument>();
 
-		StatementDocument referringDoc= storeStatementAndReturnDoc(referringStatement); 
+		StatementDocument referringDoc = storeStatementAndReturnDoc(referringStatement);
 		String result = referringDoc.getId();
-
 
 		// add Referrer info to all statements in the reference-chain
 		while (referredDoc != null) {
@@ -431,17 +430,21 @@ public class CouchDbStatementRepository implements StatementRepository {
 	}
 
 	private void doIndexingQueryIgnoreTimeout() throws DbAccessException {
-		try {
-			connector.queryView(new ViewQuery()
-					.designDocId("_design/statements")
-					.viewName(VerbRegistrationQuery.VIEWNAME).limit(1)
-					.startKey("").descending(true));
-		} catch (DbAccessException e) {
-			// TODO review, seems dangerous
-			if (e.getCause() instanceof SocketTimeoutException) {
-				doIndexingQueryIgnoreTimeout();
-			} else {
-				throw e;
+		boolean done = false;
+		while (!done) {
+			try {
+				connector.queryView(new ViewQuery()
+						.designDocId("_design/statements")
+						.viewName(VerbRegistrationQuery.VIEWNAME).limit(1)
+						.startKey("").descending(true));
+				done = true;
+			} catch (DbAccessException e) {
+				// TODO review, seems dangerous
+				if (e.getCause() instanceof SocketTimeoutException) {
+					continue;
+				} else {
+					throw e;
+				}
 			}
 		}
 	}
