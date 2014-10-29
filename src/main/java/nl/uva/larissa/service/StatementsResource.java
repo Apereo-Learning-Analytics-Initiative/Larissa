@@ -11,6 +11,7 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -219,6 +220,11 @@ public class StatementsResource {
 			MultivaluedMap<String, String> parameters) {
 		LOGGER.trace("getStatementsWithPost " + parameters.keySet());
 		return getStatementsUsingParameters(parameters);
+	}
+
+	@OPTIONS
+	public Response options() {
+		return Response.ok().build();
 	}
 
 	private Response getStatement(String id) {

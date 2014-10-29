@@ -17,6 +17,7 @@ import nl.uva.larissa.repository.couchdb.CouchDbStatementRepository;
 import nl.uva.larissa.repository.couchdb.IQueryResolver;
 import nl.uva.larissa.repository.couchdb.QueryResolver;
 import nl.uva.larissa.service.AgentStringReaderProvider;
+import nl.uva.larissa.service.CORSResponseFilter;
 import nl.uva.larissa.service.DateParamConverterProvider;
 import nl.uva.larissa.service.IllegalArgumentExceptionMapper;
 import nl.uva.larissa.service.MultiExceptionMapper;
@@ -56,6 +57,7 @@ public class Application extends ResourceConfig {
 
 			}
 		});
+		register(CORSResponseFilter.class);
 		register(JspMvcFeature.class);
 		register(WelcomeController.class);
 		register(AgentStringReaderProvider.class);
