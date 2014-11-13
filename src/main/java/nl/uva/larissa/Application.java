@@ -16,6 +16,7 @@ import nl.uva.larissa.repository.StatementRepository;
 import nl.uva.larissa.repository.couchdb.CouchDbStatementRepository;
 import nl.uva.larissa.repository.couchdb.IQueryResolver;
 import nl.uva.larissa.repository.couchdb.QueryResolver;
+import nl.uva.larissa.service.AboutResource;
 import nl.uva.larissa.service.AgentStringReaderProvider;
 import nl.uva.larissa.service.CORSResponseFilter;
 import nl.uva.larissa.service.DateParamConverterProvider;
@@ -28,6 +29,8 @@ import org.ektorp.CouchDbConnector;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
+
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 public class Application extends ResourceConfig {
 
@@ -65,5 +68,7 @@ public class Application extends ResourceConfig {
 		register(IllegalArgumentExceptionMapper.class);
 		register(DateParamConverterProvider.class);
 		register(StatementsResource.class);
+		register(AboutResource.class);
+		register(JacksonJsonProvider.class);
 	}
 }
