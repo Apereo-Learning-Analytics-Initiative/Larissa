@@ -35,7 +35,11 @@ public class StatementParserImpl implements StatementParser {
 	@Override
 	public Statement parseStatement(String json) throws ParseException {
 		try {
-			return mapper.readValue(json, Statement.class);
+			Statement result = mapper.readValue(json, Statement.class);
+			if (result == null) {
+				throw new ParseException("no data");
+			}
+			return result;
 		} catch (IOException e) {
 			throw new ParseException(e);
 		}

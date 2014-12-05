@@ -23,6 +23,7 @@ import nl.uva.larissa.service.DateParamConverterProvider;
 import nl.uva.larissa.service.IllegalArgumentExceptionMapper;
 import nl.uva.larissa.service.MultiExceptionMapper;
 import nl.uva.larissa.service.StatementsResource;
+import nl.uva.larissa.service.VersionRequestFilter;
 import nl.uva.larissa.service.welcome.WelcomeController;
 
 import org.ektorp.CouchDbConnector;
@@ -61,6 +62,7 @@ public class Application extends ResourceConfig {
 			}
 		});
 		register(CORSResponseFilter.class);
+		register(VersionRequestFilter.class);
 		register(JspMvcFeature.class);
 		register(WelcomeController.class);
 		register(AgentStringReaderProvider.class);

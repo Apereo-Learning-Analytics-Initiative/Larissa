@@ -52,7 +52,6 @@ This probably makes it a bad idea to connect to a non-localhost instance!
 
 ### General
 * no OAUth support yet
-* _X-Experience-API-Version_ header is ignored
  
 ### Statement API
 * no support for attachments
