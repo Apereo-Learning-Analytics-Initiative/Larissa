@@ -26,6 +26,7 @@ import nl.uva.larissa.json.StatementPrinterImpl;
 import nl.uva.larissa.json.model.Agent;
 
 import org.apache.abdera.i18n.iri.IRI;
+import org.apache.abdera.i18n.iri.IRISyntaxException;
 
 public class StatementFilterUtil {
 
@@ -33,7 +34,12 @@ public class StatementFilterUtil {
 		VERB("verb") {
 			@Override
 			public void setValue(StatementFilter result, String value) {
-				result.setVerb(new IRI(value));
+				try {
+					result.setVerb(new IRI(value));
+				} catch (IRISyntaxException e) {
+					throw new IllegalArgumentException(String.format(
+							"'%s' is not a valid IRI", value), e);
+				}
 			}
 
 			@Override
@@ -46,8 +52,12 @@ public class StatementFilterUtil {
 
 			@Override
 			public void setValue(StatementFilter result, String value) {
-				result.setActivity(new IRI(value));
-
+				try {
+					result.setActivity(new IRI(value));
+				} catch (IRISyntaxException e) {
+					throw new IllegalArgumentException(String.format(
+							"'%s' is not a valid IRI", value), e);
+				}
 			}
 
 			@Override
@@ -190,7 +200,7 @@ public class StatementFilterUtil {
 				Boolean result = filter.getAscending();
 				return result == null ? null : Boolean.toString(result);
 			}
-			
+
 		},
 		STARTID("startId") {
 			// FIXME validate
