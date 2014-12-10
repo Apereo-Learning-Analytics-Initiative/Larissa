@@ -29,15 +29,16 @@ public class VersionRequestFilter implements ContainerRequestFilter {
 		 * or greater. The LRS MUST make these rejects by responding with an
 		 * HTTP 400 error including a short description of the problem.
 		 */
-		String version = requestContext
-				.getHeaderString("X-Experience-API-Version");
+		String version = requestContext.getHeaderString(XapiHeader.VERSION
+				.key());
 		if (version == null) {
-			throw new IllegalArgumentException(
-					"missing header X-Experience-API-Version");
+			throw new IllegalArgumentException("missing header "
+					+ XapiHeader.VERSION.key());
 		}
 		if (!version.startsWith("1.0")) {
-			throw new IllegalArgumentException(
-					"invalid value for X-Experience-API-Version; this LRS expects requests for version 1.0.<X>");
+			throw new IllegalArgumentException("invalid value for "
+					+ XapiHeader.VERSION.key()
+					+ "; this LRS expects requests for version 1.0.<X>");
 		}
 
 	}
