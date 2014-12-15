@@ -25,10 +25,10 @@ public class TestPrinter {
 	public void testPrintIds() throws IOException, ParseException {
 		StatementPrinter printer = new StatementPrinterImpl();
 		String file = "testLongExampleStatement.json";
-		String input = Util.readFile(new File(BASEDIR, file));
+		String input = Util.readJsonFile(new File(BASEDIR, file));
 		Statement statement = parser.parseStatement(input);
 
-		String expectedOutput = Util.readFile(new File(EXPECTED_DIR, file));
+		String expectedOutput = Util.readJsonFile(new File(EXPECTED_DIR, file));
 
 		assertEquals(expectedOutput, printer.printIds(statement));
 	}

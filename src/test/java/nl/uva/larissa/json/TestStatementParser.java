@@ -52,7 +52,7 @@ public class TestStatementParser {
 		for (File testFile : testFiles) {
 			String jsonInput;
 
-			jsonInput = Util.readFile(testFile);
+			jsonInput = Util.readJsonFile(testFile);
 
 			Statement statement;
 			System.out.println("TestStatementParser testing " + testFile);
@@ -84,7 +84,7 @@ public class TestStatementParser {
 			File expectedFile = new File(expectedOutputDir, testFile.getName());
 			if (expectedFile.exists()) {
 
-				expectedOutput = Util.readFile(expectedFile);
+				expectedOutput = Util.readJsonFile(expectedFile);
 
 				message = "printing " + testFile.getName()
 						+ " should match expected file";

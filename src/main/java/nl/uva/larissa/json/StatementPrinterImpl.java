@@ -11,7 +11,6 @@ import nl.uva.larissa.json.model.StatementResult;
 import org.apache.abdera.i18n.iri.IRI;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -46,30 +45,26 @@ public class StatementPrinterImpl implements StatementPrinter {
 
 	@Override
 	public String printStatement(Statement statement) throws IOException {
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-				statement);
+		return mapper.writeValueAsString(statement);
 	}
 
 	@Override
 	public String print(StatementResult result) throws IOException {
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-				result);
-	}
-
-	@Override
-	public String printCompact(Object object) throws JsonProcessingException {
-		return mapper.writeValueAsString(object);
+		return mapper.writeValueAsString(result);
 	}
 
 	@Override
 	public String printIds(Statement statement) throws IOException {
-		return idsMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-				statement);
+		return idsMapper.writeValueAsString(statement);
 	}
 
 	@Override
 	public String printIds(StatementResult result) throws IOException {
-		return idsMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-				result);
+		return idsMapper.writeValueAsString(result);
+	}
+
+	@Override
+	public String printCompact(Object object) throws IOException {
+		return mapper.writeValueAsString(object);
 	}
 }
