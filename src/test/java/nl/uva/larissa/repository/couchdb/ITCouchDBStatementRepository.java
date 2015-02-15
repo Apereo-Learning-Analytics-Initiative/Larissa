@@ -1,8 +1,6 @@
 package nl.uva.larissa.repository.couchdb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -555,6 +553,34 @@ public class ITCouchDBStatementRepository {
 		assertEquals(Arrays.asList(statX.getId(), statY.getId()),
 				Arrays.asList(statements.get(0).getId(), statements.get(1)
 						.getId()));
+	}
+
+	@Test
+	public void testTimeStamping() throws DuplicateIdException,
+			VoidingTargetException, UnknownStatementException {
+		Statement statementWithTimestamp = createStatement();
+		Date secondAgo = new Date(System.currentTimeMillis() - 1000);
+		statementWithTimestamp.setTimestamp(secondAgo);
+		Statement statementWithoutTimestamp = createStatement();
+		assertNull(statementWithoutTimestamp.getTimestamp());
+
+		String withTimeStampId = repository
+				.storeStatement(statementWithTimestamp);
+		String withoutTimeStampId = repository
+				.storeStatement(statementWithoutTimestamp);
+
+		Statement statement = repository.getStatement(withTimeStampId)
+				.getStatements().get(0);
+		
+		assertTrue(secondAgo.before(statement.getStored()));
+		assertEquals(secondAgo, statement.getTimestamp());
+		
+		statement = repository.getStatement(withoutTimeStampId)
+				.getStatements().get(0);
+		
+		assertNotNull(statement.getTimestamp());
+		
+		assertEquals(statement.getStored(), statement.getTimestamp());
 	}
 
 	private List<Statement> getStatements(StatementFilter filter) {

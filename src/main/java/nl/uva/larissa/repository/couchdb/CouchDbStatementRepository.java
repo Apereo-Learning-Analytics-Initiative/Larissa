@@ -212,8 +212,18 @@ public class CouchDbStatementRepository implements StatementRepository {
 			statement.setId(UUID.randomUUID().toString());
 		}
 		cDBStatement.setId(statement.getId());
+		boolean timestampGenerated= false;
 		try {
-			statement.setStored(new Date());
+			Date now= new Date();
+			statement.setStored(now);
+			/* 
+			 * xAPI 1.0.1 4.1 regarding timestamp: 
+			 * 'If not provided, LRS should set this to the value of "stored" time.'
+			 */
+			if (statement.getTimestamp() == null) {
+				statement.setTimestamp(now);
+				timestampGenerated= true;
+			}
 			connector.create(cDBStatement);
 			if (++storeCounter > INDEXING_THRESHOLD) {
 				scheduleIndex();
@@ -221,6 +231,9 @@ public class CouchDbStatementRepository implements StatementRepository {
 			}
 		} catch (UpdateConflictException e) {
 			statement.setStored(null);
+			if (timestampGenerated) {
+				statement.setTimestamp(null);
+			}
 			throw new DuplicateIdException(e, cDBStatement.getId());
 		}
 		return cDBStatement;
