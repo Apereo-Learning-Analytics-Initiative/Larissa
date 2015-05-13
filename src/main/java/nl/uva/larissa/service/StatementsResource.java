@@ -65,6 +65,9 @@ public class StatementsResource {
 	@Context
 	SecurityContext securityContext;
 
+	@Context
+	UriInfo uriInfo;
+	
 	private static Logger LOGGER = LoggerFactory
 			.getLogger(StatementsResource.class);
 
@@ -104,7 +107,7 @@ public class StatementsResource {
 		Agent result = new Agent();
 		IFI ifi = new IFI();
 		Account account = new Account();
-		account.setHomePage(new IRI("http://lrs.uva.nl"));
+		account.setHomePage(new IRI(uriInfo.getBaseUri()));
 		account.setName(securityContext.getUserPrincipal().getName());
 		ifi.setAccount(account);
 		result.setIdentifier(ifi);

@@ -47,7 +47,8 @@ public class ConfigReader {
 			throw new RuntimeException("error reading configuration", e);
 		}
 		for (Key key : Key.values()) {
-			if (!props.containsKey(key.key())) {
+			if (!props.containsKey(key.key()) && key != Key.COUCHDB_USERNAME
+					&& key != Key.COUCHDB_PASSWORD) {
 				throw new IllegalStateException(
 						"missing configuration property " + key.key());
 			}
