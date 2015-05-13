@@ -26,6 +26,10 @@
 		<param-value>WEB-INF/lrs.conf</param-value>
 	</context-param>
 
+	<error-page>
+		<exception-type>javax.servlet.ServletException</exception-type>
+		<location>/error.html</location>
+	</error-page>
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>xAPI</web-resource-name>

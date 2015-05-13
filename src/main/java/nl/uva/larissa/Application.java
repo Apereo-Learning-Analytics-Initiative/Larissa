@@ -42,7 +42,9 @@ public class Application extends ResourceConfig {
 		final CouchDbConnector connector = new CouchDbConnectorFactory()
 				.createConnector(config.get(Key.COUCHDB_URL), config
 						.get(Key.COUCHDB_DB_NAME), Integer.parseInt(config
-						.get(Key.COUCHDB_MAX_CONNECTIONS)));
+						.get(Key.COUCHDB_MAX_CONNECTIONS)), config
+						.get(Key.COUCHDB_USERNAME), config
+						.get(Key.COUCHDB_PASSWORD));
 
 		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 		final Validator validator = factory.getValidator();

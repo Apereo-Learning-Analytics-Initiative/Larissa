@@ -45,9 +45,6 @@ Configurable properties are in _WEB-INF/lrs.conf_.
 The location of the properties file is  determined by the value of the 
 context-parameter _lrs.config_, relative to location of the webapp folder.
 
-Note that you cannot currently configure credentials to connect to CouchDB.
-This probably makes it a bad idea to connect to a non-localhost instance!
-
 ## xAPI Coverage
 
 ### General

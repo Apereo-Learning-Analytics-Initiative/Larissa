@@ -44,11 +44,20 @@ public class CouchDbConnectorFactory {
 		return mapper;
 	}
 
-	public CouchDbConnector createConnector(String couchUrl, String dbName, int maxConnections) {
+	public CouchDbConnector createConnector(String couchUrl, String dbName,
+			int maxConnections, String username, String password) {
 		HttpClient httpClient;
 
 		try {
-			httpClient = new StdHttpClient.Builder().url(couchUrl).maxConnections(maxConnections).build();
+			StdHttpClient.Builder builder = new StdHttpClient.Builder().url(
+					couchUrl).maxConnections(maxConnections);
+			if (username != null) {
+				builder.username(username);
+			}
+			if (password != null) {
+				builder.password(password);
+			}
+			httpClient = builder.build();
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
@@ -66,6 +75,11 @@ public class CouchDbConnectorFactory {
 		};
 
 		return connector;
+	}
+
+	public CouchDbConnector createConnector(String couchUrl, String dbName,
+			int maxConnections) {
+		return createConnector(couchUrl, dbName, maxConnections, null, null);
 	}
 
 }

@@ -12,7 +12,8 @@ public class ConfigReader {
 
 	enum Key {
 		COUCHDB_URL("couchdb.url"), COUCHDB_DB_NAME("couchdb.db.name"), COUCHDB_MAX_CONNECTIONS(
-				"couchdb.connections.max");
+				"couchdb.connections.max"), COUCHDB_USERNAME("couchdb.username"), COUCHDB_PASSWORD(
+				"couchdb.password");
 		private String key;
 
 		Key(String key) {
