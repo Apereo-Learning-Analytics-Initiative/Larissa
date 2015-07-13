@@ -23,7 +23,7 @@
 	<context-param>
 		<description>the location of the configuration file, relative to the root of the webapp directory</description>
 		<param-name>lrs.config</param-name>
-		<param-value>WEB-INF/lrs.conf</param-value>
+		<param-value>/WEB-INF/lrs.conf</param-value>
 	</context-param>
 
 	<error-page>
