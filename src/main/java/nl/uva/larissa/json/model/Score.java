@@ -5,9 +5,9 @@ package nl.uva.larissa.json.model;
 // also SCORM 2004 4th edition says something about 7 digits and claims raw is superseded but defines it anyway!
 public class Score {
 	Float scaled;
-	Integer raw;
-	Integer min;
-	Integer max;
+	Float raw;
+	Float min;
+	Float max;
 
 	public Float getScaled() {
 		return scaled;
@@ -17,27 +17,27 @@ public class Score {
 		this.scaled = scaled;
 	}
 
-	public Integer getRaw() {
+	public Float getRaw() {
 		return raw;
 	}
 
-	public void setRaw(Integer raw) {
+	public void setRaw(Float raw) {
 		this.raw = raw;
 	}
 
-	public Integer getMin() {
+	public Float getMin() {
 		return min;
 	}
 
-	public void setMin(Integer min) {
+	public void setMin(Float min) {
 		this.min = min;
 	}
 
-	public Integer getMax() {
+	public Float getMax() {
 		return max;
 	}
 
-	public void setMax(Integer max) {
+	public void setMax(Float max) {
 		this.max = max;
 	}
 

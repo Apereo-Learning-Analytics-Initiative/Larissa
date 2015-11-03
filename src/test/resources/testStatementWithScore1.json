@@ -26,8 +26,8 @@
   },
   "result" : {
     "score" : {
-      "raw" : 679,
-      "min" : 0
+      "raw" : 679.1,
+      "min" : 0.0
     },
     "extensions" : {
       "http://tincanapi.com/JsTetris_TCAPI/time" : "11",

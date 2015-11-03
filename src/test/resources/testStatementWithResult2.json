@@ -18,9 +18,9 @@
   "result" : {
     "score" : {
       "scaled" : 0.2,
-      "raw" : 20,
-      "min" : 0,
-      "max" : 100
+      "raw" : 20.6,
+      "min" : 0.0,
+      "max" : 100.0
     },
     "success" : false
   },
