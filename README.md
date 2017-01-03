@@ -52,7 +52,7 @@ context-parameter _lrs.config_, relative to location of the webapp folder.
  
 ### Statement API
 * no support for attachments
-* a StatementRef in a SubStatement will currently not respect <a href="https://github.com/adlnet/xAPI-Spec/blob/master/xAPI.md#filter-conditions-for-statementrefs">Filter Conditions for StatementRefs</a> when querying.
+* a StatementRef in a SubStatement will currently not respect <a href="https://github.com/adlnet/xAPI-Spec/blob/1.0.1/xAPI.md#filter-conditions-for-statementrefs">Filter Conditions for StatementRefs</a> when querying.
 * _agent_ query-parameter only accept Agents, not Groups
 * _format=ids_ queries only work when using filter-parameters (e.g. not _statementId_)
 * _format=canonical_ queries do not work
